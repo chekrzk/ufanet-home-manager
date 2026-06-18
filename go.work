@@ -1,0 +1,11 @@
+go 1.25.6
+
+use (
+	./api-gateway
+	./contracts
+	./services/auth-service
+	./services/news-service
+	./services/notification-service
+	./services/profile-service
+	./services/requests-service
+)

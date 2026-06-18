@@ -1,0 +1,29 @@
+# Go
+bin/
+*.exe
+*.test
+*.out
+coverage.out
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Local data
+data/
+tmp/
+postgres-data/
+redis-data/
+clickhouse-data/
