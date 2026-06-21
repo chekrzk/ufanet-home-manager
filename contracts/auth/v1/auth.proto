@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package ufanet.home_manager.auth.v1;
+
+option go_package = "github.com/chekrzk/ufanet-home-manager/contracts/gen/go/auth/v1;authv1";
+
+import "common/v1/common.proto";
+
+service AuthService {
+  rpc Login(LoginRequest) returns (AuthTokens);
+  rpc Register(RegisterRequest) returns (ufanet.home_manager.common.v1.User);
+  rpc Refresh(RefreshRequest) returns (AuthTokens);
+}
+
+message LoginRequest {
+  string phone = 1;
+  string password = 2;
+}
+
+message RegisterRequest {
+  string phone = 1;
+  string password = 2;
+  string full_name = 3;
+  string house_id = 4;
+  string apartment = 5;
+}
+
+message RefreshRequest {
+  string refresh_token = 1;
+}
+
+message AuthTokens {
+  string access_token = 1;
+  string refresh_token = 2;
+  int64 expires_in = 3;
+}
+

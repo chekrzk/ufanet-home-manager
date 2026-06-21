@@ -8,12 +8,13 @@ import (
 )
 
 type Config struct {
-	App     AppConfig
-	HTTP    HTTPConfig
-	Log     LogConfig
-	Timeout TimeoutConfig
-	JWT     JWTConfig
-	Service ServiceConfig
+	App       AppConfig
+	HTTP      HTTPConfig
+	Log       LogConfig
+	Timeout   TimeoutConfig
+	JWT       JWTConfig
+	RateLimit RateLimitConfig
+	Service   ServiceConfig
 }
 
 type AppConfig struct {
@@ -22,7 +23,7 @@ type AppConfig struct {
 }
 
 type HTTPConfig struct {
-	Host string `envconfig:"HTTP_HOST" default:"`
+	Host string `envconfig:"HTTP_HOST" default:"0.0.0.0"`
 	Port string `envconfig:"HTTP_PORT" default:"8080"`
 }
 
@@ -40,7 +41,13 @@ type TimeoutConfig struct {
 }
 
 type JWTConfig struct {
-	Secret string `envconfig:"JWT_SECRET" default:"dev-secret-change-me"`
+	Secret    string        `envconfig:"JWT_SECRET" default:"dev-secret-change-me"`
+	AccessTTL time.Duration `envconfig:"JWT_ACCESS_TTL" default:"15m"`
+}
+
+type RateLimitConfig struct {
+	Max        int           `envconfig:"RATE_LIMIT_MAX" default:"100"`
+	Expiration time.Duration `envconfig:"RATE_LIMIT_EXPIRATION" default:"1m"`
 }
 
 type ServiceConfig struct {
@@ -48,6 +55,7 @@ type ServiceConfig struct {
 	NewsAddr          string `envconfig:"NEWS_SERVICE_ADDR" default:"localhost:50052"`
 	RequestsAddr      string `envconfig:"REQUESTS_SERVICE_ADDR" default:"localhost:50053"`
 	NotificationsAddr string `envconfig:"NOTIFICATIONS_SERVICE_ADDR" default:"localhost:50054"`
+	ProfileAddr       string `envconfig:"PROFILE_SERVICE_ADDR" default:"localhost:50055"`
 }
 
 func Load() (*Config, error) {

@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package ufanet.home_manager.profile.v1;
+
+option go_package = "github.com/chekrzk/ufanet-home-manager/contracts/gen/go/profile/v1;profilev1";
+
+import "common/v1/common.proto";
+
+service ProfileService {
+  rpc Me(MeRequest) returns (ufanet.home_manager.common.v1.User);
+  rpc Update(UpdateProfileRequest) returns (ufanet.home_manager.common.v1.User);
+}
+
+message MeRequest {
+  ufanet.home_manager.common.v1.UserContext user = 1;
+}
+
+message UpdateProfileRequest {
+  ufanet.home_manager.common.v1.UserContext user = 1;
+  string full_name = 2;
+  string apartment = 3;
+}
+
