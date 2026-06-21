@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package ufanet.home_manager.requests.v1;
+
+option go_package = "github.com/chekrzk/ufanet-home-manager/contracts/gen/go/requests/v1;requestsv1";
+
+import "common/v1/common.proto";
+
+service RequestsService {
+  rpc CreateRequest(CreateRequestRequest) returns (ufanet.home_manager.common.v1.MaintenanceRequest);
+  rpc ListRequests(ListRequestsRequest) returns (ListRequestsResponse);
+  rpc GetRequest(GetRequestRequest) returns (ufanet.home_manager.common.v1.MaintenanceRequest);
+  rpc UpdateRequestStatus(UpdateRequestStatusRequest) returns (ufanet.home_manager.common.v1.MaintenanceRequest);
+  rpc AddRequestComment(AddRequestCommentRequest) returns (ufanet.home_manager.common.v1.Empty);
+}
+
+message CreateRequestRequest {
+  ufanet.home_manager.common.v1.UserContext user = 1;
+  string category = 2;
+  string description = 3;
+}
+
+message ListRequestsRequest {
+  ufanet.home_manager.common.v1.UserContext user = 1;
+  ufanet.home_manager.common.v1.Pagination pagination = 2;
+}
+
+message ListRequestsResponse {
+  repeated ufanet.home_manager.common.v1.MaintenanceRequest items = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 total = 4;
+}
+
+message GetRequestRequest {
+  ufanet.home_manager.common.v1.UserContext user = 1;
+  string request_id = 2;
+}
+
+message UpdateRequestStatusRequest {
+  ufanet.home_manager.common.v1.UserContext actor = 1;
+  string request_id = 2;
+  string status = 3;
+}
+
+message AddRequestCommentRequest {
+  ufanet.home_manager.common.v1.UserContext user = 1;
+  string request_id = 2;
+  string text = 3;
+}
+
