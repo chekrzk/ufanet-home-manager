@@ -5,6 +5,7 @@ go 1.25.6
 require (
 	github.com/chekrzk/ufanet-home-manager/contracts v0.0.0
 	github.com/gofiber/fiber/v2 v2.52.13
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/joho/godotenv v1.5.1
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/rs/zerolog v1.35.1

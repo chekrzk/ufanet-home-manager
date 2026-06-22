@@ -24,7 +24,10 @@ func (h *Handler) Register(c *fiber.Ctx) error {
 		return err
 	}
 
-	if err := h.service.RegisterDevice(c.Context(), authContext(c), req); err != nil {
+	if err := h.service.RegisterDevice(c.Context(), authContext(c), domain.RegisterDevice{
+		Token:    req.Token,
+		Platform: req.Platform,
+	}); err != nil {
 		return gwerrors.FromGRPC(err)
 	}
 
@@ -37,7 +40,9 @@ func (h *Handler) Unregister(c *fiber.Ctx) error {
 		return err
 	}
 
-	if err := h.service.UnregisterDevice(c.Context(), authContext(c), req); err != nil {
+	if err := h.service.UnregisterDevice(c.Context(), authContext(c), domain.UnregisterDevice{
+		Token: req.Token,
+	}); err != nil {
 		return gwerrors.FromGRPC(err)
 	}
 

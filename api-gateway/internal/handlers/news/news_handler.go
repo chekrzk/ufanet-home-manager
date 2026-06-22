@@ -25,7 +25,11 @@ func (h *Handler) List(c *fiber.Ctx) error {
 	}
 	req.Normalize()
 
-	page, err := h.service.List(c.Context(), authContext(c), req)
+	page, err := h.service.List(c.Context(), authContext(c), domain.NewsFilter{
+		Pagination: domain.Pagination{Page: req.Page, Limit: req.Limit},
+		DateFrom:   req.DateFrom,
+		DateTo:     req.DateTo,
+	})
 	if err != nil {
 		return gwerrors.FromGRPC(err)
 	}
@@ -39,7 +43,11 @@ func (h *Handler) Create(c *fiber.Ctx) error {
 		return err
 	}
 
-	item, err := h.service.Create(c.Context(), authContext(c), req)
+	item, err := h.service.Create(c.Context(), authContext(c), domain.CreateNews{
+		Title:   req.Title,
+		Body:    req.Body,
+		HouseID: req.HouseID,
+	})
 	if err != nil {
 		return gwerrors.FromGRPC(err)
 	}

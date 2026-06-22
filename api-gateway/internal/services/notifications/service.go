@@ -4,37 +4,24 @@ import (
 	"context"
 
 	"github.com/chekrzk/ufanet-home-manager/api-gateway/internal/models/domain"
-	"github.com/chekrzk/ufanet-home-manager/api-gateway/internal/models/dto"
-	commonv1 "github.com/chekrzk/ufanet-home-manager/contracts/gen/go/common/v1"
-	notificationsv1 "github.com/chekrzk/ufanet-home-manager/contracts/gen/go/notifications/v1"
-	"google.golang.org/grpc"
+	"github.com/rs/zerolog"
 )
 
 type service struct {
-	client notificationsv1.NotificationsServiceClient
+	client Client
+	log    zerolog.Logger
 }
 
-func New(conn *grpc.ClientConn) Service {
-	return service{client: notificationsv1.NewNotificationsServiceClient(conn)}
+func New(client Client, log zerolog.Logger) Service {
+	return service{client: client, log: log}
 }
 
-func (s service) RegisterDevice(ctx context.Context, actor domain.AuthContext, req dto.RegisterDeviceRequest) error {
-	_, err := s.client.RegisterDevice(ctx, &notificationsv1.RegisterDeviceRequest{
-		User:     userContext(actor),
-		Token:    req.Token,
-		Platform: req.Platform,
-	})
-	return err
+func (s service) RegisterDevice(ctx context.Context, actor domain.AuthContext, device domain.RegisterDevice) error {
+	s.log.Debug().Str("user_id", actor.UserID).Msg("register device via notifications service")
+	return s.client.RegisterDevice(ctx, actor, device)
 }
 
-func (s service) UnregisterDevice(ctx context.Context, actor domain.AuthContext, req dto.UnregisterDeviceRequest) error {
-	_, err := s.client.UnregisterDevice(ctx, &notificationsv1.UnregisterDeviceRequest{
-		User:  userContext(actor),
-		Token: req.Token,
-	})
-	return err
-}
-
-func userContext(actor domain.AuthContext) *commonv1.UserContext {
-	return &commonv1.UserContext{UserId: actor.UserID, Role: actor.Role}
+func (s service) UnregisterDevice(ctx context.Context, actor domain.AuthContext, device domain.UnregisterDevice) error {
+	s.log.Debug().Str("user_id", actor.UserID).Msg("unregister device via notifications service")
+	return s.client.UnregisterDevice(ctx, actor, device)
 }

@@ -33,7 +33,10 @@ func (h *Handler) Update(c *fiber.Ctx) error {
 		return err
 	}
 
-	user, err := h.service.Update(c.Context(), authContext(c), req)
+	user, err := h.service.Update(c.Context(), authContext(c), domain.UpdateProfile{
+		FullName:  req.FullName,
+		Apartment: req.Apartment,
+	})
 	if err != nil {
 		return gwerrors.FromGRPC(err)
 	}

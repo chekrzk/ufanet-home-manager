@@ -9,7 +9,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"github.com/chekrzk/ufanet-home-manager/api-gateway/internal/config"
+	"github.com/chekrzk/ufanet-home-manager/api-gateway/config"
 )
 
 func New(cfg *config.Config) zerolog.Logger {
