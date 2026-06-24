@@ -7,26 +7,26 @@ import (
 	"github.com/rs/zerolog"
 )
 
-type service struct {
+type Service struct {
 	client Client
 	log    zerolog.Logger
 }
 
-func New(client Client, log zerolog.Logger) Service {
-	return service{client: client, log: log}
+func New(client Client, log zerolog.Logger) *Service {
+	return &Service{client: client, log: log}
 }
 
-func (s service) Login(ctx context.Context, credentials domain.LoginCredentials) (domain.AuthTokens, error) {
+func (s *Service) Login(ctx context.Context, credentials domain.LoginCredentials) (domain.AuthTokens, error) {
 	s.log.Debug().Msg("login via auth service")
 	return s.client.Login(ctx, credentials)
 }
 
-func (s service) Register(ctx context.Context, user domain.RegisterUser) (domain.User, error) {
+func (s *Service) Register(ctx context.Context, user domain.RegisterUser) (domain.User, error) {
 	s.log.Debug().Msg("register via auth service")
 	return s.client.Register(ctx, user)
 }
 
-func (s service) Refresh(ctx context.Context, refreshToken string) (domain.AuthTokens, error) {
+func (s *Service) Refresh(ctx context.Context, refreshToken string) (domain.AuthTokens, error) {
 	s.log.Debug().Msg("refresh tokens via auth service")
 	return s.client.Refresh(ctx, refreshToken)
 }

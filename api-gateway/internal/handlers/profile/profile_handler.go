@@ -7,14 +7,13 @@ import (
 	"github.com/chekrzk/ufanet-home-manager/api-gateway/internal/models/constant"
 	"github.com/chekrzk/ufanet-home-manager/api-gateway/internal/models/domain"
 	"github.com/chekrzk/ufanet-home-manager/api-gateway/internal/models/dto"
-	profileservice "github.com/chekrzk/ufanet-home-manager/api-gateway/internal/services/profile"
 )
 
 type Handler struct {
-	service profileservice.Service
+	service Service
 }
 
-func NewHandler(service profileservice.Service) *Handler {
+func NewHandler(service Service) *Handler {
 	return &Handler{service: service}
 }
 

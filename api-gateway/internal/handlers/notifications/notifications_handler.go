@@ -7,14 +7,13 @@ import (
 	"github.com/chekrzk/ufanet-home-manager/api-gateway/internal/models/constant"
 	"github.com/chekrzk/ufanet-home-manager/api-gateway/internal/models/domain"
 	"github.com/chekrzk/ufanet-home-manager/api-gateway/internal/models/dto"
-	notificationsservice "github.com/chekrzk/ufanet-home-manager/api-gateway/internal/services/notifications"
 )
 
 type Handler struct {
-	service notificationsservice.Service
+	service Service
 }
 
-func NewHandler(service notificationsservice.Service) *Handler {
+func NewHandler(service Service) *Handler {
 	return &Handler{service: service}
 }
 

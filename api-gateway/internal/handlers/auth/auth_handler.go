@@ -6,14 +6,13 @@ import (
 	gwerrors "github.com/chekrzk/ufanet-home-manager/api-gateway/internal/errors"
 	"github.com/chekrzk/ufanet-home-manager/api-gateway/internal/models/domain"
 	"github.com/chekrzk/ufanet-home-manager/api-gateway/internal/models/dto"
-	authservice "github.com/chekrzk/ufanet-home-manager/api-gateway/internal/services/auth"
 )
 
 type Handler struct {
-	service authservice.Service
+	service Service
 }
 
-func NewHandler(service authservice.Service) *Handler {
+func NewHandler(service Service) *Handler {
 	return &Handler{service: service}
 }
 
