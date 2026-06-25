@@ -3,9 +3,9 @@ go 1.25.6
 use (
 	./api-gateway
 	./contracts
-	./services/auth-service
-	./services/news-service
-	./services/notification-service
-	./services/profile-service
-	./services/requests-service
+	./microservices/auth-service
+	./microservices/news-service
+	./microservices/notification-service
+	./microservices/profile-service
+	./microservices/requests-service
 )

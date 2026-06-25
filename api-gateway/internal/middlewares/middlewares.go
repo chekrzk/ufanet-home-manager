@@ -1,19 +1,17 @@
 package middlewares
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/base64"
-	"encoding/json"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/rs/zerolog"
 
-	"github.com/chekrzk/ufanet-home-manager/api-gateway/internal/config"
+	"github.com/chekrzk/ufanet-home-manager/api-gateway/config"
 	gwerrors "github.com/chekrzk/ufanet-home-manager/api-gateway/internal/errors"
 	"github.com/chekrzk/ufanet-home-manager/api-gateway/internal/models/constant"
 )
@@ -47,6 +45,14 @@ func (m *Middlewares) Logger() fiber.Handler {
 
 		return err
 	}
+}
+
+func (m *Middlewares) CORS() fiber.Handler {
+	return cors.New(cors.Config{
+		AllowOrigins: m.cfg.CORS.AllowedOrigins,
+		AllowMethods: m.cfg.CORS.AllowedMethods,
+		AllowHeaders: m.cfg.CORS.AllowedHeaders,
+	})
 }
 
 func (m *Middlewares) RateLimit() fiber.Handler {
@@ -149,41 +155,22 @@ func bearerToken(c *fiber.Ctx) string {
 }
 
 type jwtClaims struct {
-	Subject string `json:"sub"`
-	Role    string `json:"role"`
-	Exp     int64  `json:"exp"`
+	Role string `json:"role"`
+	jwt.RegisteredClaims
 }
 
 func parseJWT(token string, secret string) (jwtClaims, error) {
 	var claims jwtClaims
 
-	parts := strings.Split(token, ".")
-	if len(parts) != 3 {
-		return claims, gwerrors.ErrUnauthorized
-	}
-
-	signed := parts[0] + "." + parts[1]
-	expected := signHS256(signed, secret)
-	if !hmac.Equal([]byte(expected), []byte(parts[2])) {
-		return claims, gwerrors.ErrUnauthorized
-	}
-
-	payload, err := base64.RawURLEncoding.DecodeString(parts[1])
-	if err != nil {
-		return claims, err
-	}
-	if err := json.Unmarshal(payload, &claims); err != nil {
-		return claims, err
-	}
-	if claims.Subject == "" || claims.Role == "" || claims.Exp <= time.Now().Unix() {
+	parsed, err := jwt.ParseWithClaims(token, &claims, func(token *jwt.Token) (any, error) {
+		if token.Method != jwt.SigningMethodHS256 {
+			return nil, gwerrors.ErrUnauthorized
+		}
+		return []byte(secret), nil
+	})
+	if err != nil || !parsed.Valid || claims.Subject == "" || claims.Role == "" {
 		return claims, gwerrors.ErrUnauthorized
 	}
 
 	return claims, nil
-}
-
-func signHS256(message string, secret string) string {
-	mac := hmac.New(sha256.New, []byte(secret))
-	_, _ = mac.Write([]byte(message))
-	return base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
 }

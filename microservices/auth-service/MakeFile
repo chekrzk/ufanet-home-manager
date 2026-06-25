@@ -1,0 +1,53 @@
+APP_NAME := auth-service
+IMAGE_NAME := ufanet-home-manager/$(APP_NAME)
+IMAGE_TAG ?= local
+CONTAINER_NAME := $(APP_NAME)
+ROOT_DIR := ../..
+ENV_FILE ?= resources/env/.env
+PORT ?= 50051
+
+.PHONY: help build run up down restart logs test tidy clean
+
+help:
+	@echo "Targets:"
+	@echo "  make build    Build Docker image"
+	@echo "  make run      Run service locally with go run"
+	@echo "  make up       Start Docker container"
+	@echo "  make down     Stop and remove Docker container"
+	@echo "  make restart  Restart Docker container"
+	@echo "  make logs     Follow Docker container logs"
+	@echo "  make test     Run Go tests"
+	@echo "  make tidy     Run go mod tidy"
+	@echo "  make clean    Remove Docker image"
+
+build:
+	docker build -f Dockerfile -t $(IMAGE_NAME):$(IMAGE_TAG) $(ROOT_DIR)
+
+run:
+	go run ./cmd
+
+up: build
+	docker rm -f $(CONTAINER_NAME) >/dev/null 2>&1 || true
+	docker run -d \
+		--name $(CONTAINER_NAME) \
+		--env-file $(ENV_FILE) \
+		-p $(PORT):$(PORT) \
+		$(IMAGE_NAME):$(IMAGE_TAG)
+
+down:
+	docker rm -f $(CONTAINER_NAME)
+
+restart: down up
+
+logs:
+	docker logs -f $(CONTAINER_NAME)
+
+test:
+	go test ./...
+
+tidy:
+	go mod tidy
+
+clean:
+	docker rmi -f $(IMAGE_NAME):$(IMAGE_TAG)
+

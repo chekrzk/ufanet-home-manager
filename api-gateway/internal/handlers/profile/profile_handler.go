@@ -7,14 +7,13 @@ import (
 	"github.com/chekrzk/ufanet-home-manager/api-gateway/internal/models/constant"
 	"github.com/chekrzk/ufanet-home-manager/api-gateway/internal/models/domain"
 	"github.com/chekrzk/ufanet-home-manager/api-gateway/internal/models/dto"
-	profileservice "github.com/chekrzk/ufanet-home-manager/api-gateway/internal/services/profile"
 )
 
 type Handler struct {
-	service profileservice.Service
+	service Service
 }
 
-func NewHandler(service profileservice.Service) *Handler {
+func NewHandler(service Service) *Handler {
 	return &Handler{service: service}
 }
 
@@ -33,7 +32,10 @@ func (h *Handler) Update(c *fiber.Ctx) error {
 		return err
 	}
 
-	user, err := h.service.Update(c.Context(), authContext(c), req)
+	user, err := h.service.Update(c.Context(), authContext(c), domain.UpdateProfile{
+		FullName:  req.FullName,
+		Apartment: req.Apartment,
+	})
 	if err != nil {
 		return gwerrors.FromGRPC(err)
 	}
