@@ -1,0 +1,64 @@
+package router
+
+import (
+	"github.com/gofiber/fiber/v2"
+
+	"github.com/chekrzk/ufanet-home-manager/api-gateway/internal/middlewares"
+	"github.com/chekrzk/ufanet-home-manager/api-gateway/internal/models/constant"
+)
+
+type Handlers struct {
+	Health        HealthHandler
+	Auth          AuthHandler
+	News          NewsHandler
+	Notifications NotificationsHandler
+	Profile       ProfileHandler
+}
+
+type Router struct {
+	app *fiber.App
+	mw  *middlewares.Middlewares
+	h   Handlers
+}
+
+func New(app *fiber.App, mw *middlewares.Middlewares, h Handlers) *Router {
+	return &Router{
+		app: app,
+		mw:  mw,
+		h:   h,
+	}
+}
+
+func (r *Router) Register() {
+	r.app.Use(r.mw.Logger())
+	r.app.Use(r.mw.RateLimit())
+
+	r.health()
+	r.auth()
+	r.protected()
+}
+
+func (r *Router) health() {
+	r.app.Get("/health", r.h.Health.Check)
+}
+
+func (r *Router) auth() {
+	auth := r.app.Group("/auth")
+	auth.Post("/login", r.h.Auth.Login)
+	auth.Post("/registr", r.h.Auth.Register)
+	auth.Post("/register", r.h.Auth.Register)
+	auth.Post("/refresh", r.h.Auth.Refresh)
+}
+
+func (r *Router) protected() {
+	api := r.app.Group("", r.mw.Blacklist(), r.mw.JWT())
+
+	api.Get("/profile", r.h.Profile.Me)
+	api.Patch("/profile", r.h.Profile.Update)
+
+	api.Get("/news", r.h.News.List)
+	api.Post("/news", r.mw.Role(constant.RoleAdmin, constant.RoleEmployee), r.h.News.Create)
+
+	api.Post("/notifications/register", r.h.Notifications.Register)
+	api.Delete("/notifications/unregister", r.h.Notifications.Unregister)
+}

@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package ufanet.home_manager.common.v1;
+
+option go_package = "github.com/chekrzk/ufanet-home-manager/contracts/gen/go/common/v1;commonv1";
+
+import "google/protobuf/timestamp.proto";
+
+message Empty {}
+
+message UserContext {
+  string user_id = 1;
+  string role = 2;
+}
+
+message Pagination {
+  int32 page = 1;
+  int32 limit = 2;
+}
+
+message User {
+  string id = 1;
+  string phone = 2;
+  string full_name = 3;
+  string role = 4;
+  string house_id = 5;
+  string apartment = 6;
+}
+
+message News {
+  string id = 1;
+  string title = 2;
+  string body = 3;
+  string house_id = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+
+message MaintenanceRequest {
+  string id = 1;
+  string user_id = 2;
+  string category = 3;
+  string description = 4;
+  string status = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+

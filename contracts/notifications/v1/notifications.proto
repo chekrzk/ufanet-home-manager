@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package ufanet.home_manager.notifications.v1;
+
+option go_package = "github.com/chekrzk/ufanet-home-manager/contracts/gen/go/notifications/v1;notificationsv1";
+
+import "common/v1/common.proto";
+
+service NotificationsService {
+  rpc RegisterDevice(RegisterDeviceRequest) returns (ufanet.home_manager.common.v1.Empty);
+  rpc UnregisterDevice(UnregisterDeviceRequest) returns (ufanet.home_manager.common.v1.Empty);
+}
+
+message RegisterDeviceRequest {
+  ufanet.home_manager.common.v1.UserContext user = 1;
+  string token = 2;
+  string platform = 3;
+}
+
+message UnregisterDeviceRequest {
+  ufanet.home_manager.common.v1.UserContext user = 1;
+  string token = 2;
+}
+
