@@ -1,37 +1,37 @@
-APP_NAME := api-gateway
-IMAGE_NAME := ufanet-home-manager/$(APP_NAME)
+APP_NAME := ufanet-front
+IMAGE_NAME := ufanet-home-manager/front
 IMAGE_TAG ?= local
 CONTAINER_NAME := $(APP_NAME)
 ROOT_DIR := ..
-ENV_FILE ?= .env
-PORT ?= 8086
+PORT ?= 3000
 
-.PHONY: help build run up down restart logs test tidy clean
+.PHONY: help install dev build up down restart logs clean
 
 help:
 	@echo "Targets:"
+	@echo "  make install  Install npm dependencies"
+	@echo "  make dev      Start local Vite dev server"
 	@echo "  make build    Build Docker image"
-	@echo "  make run      Run service locally with go run"
 	@echo "  make up       Start Docker container"
 	@echo "  make down     Stop and remove Docker container"
 	@echo "  make restart  Restart Docker container"
 	@echo "  make logs     Follow Docker container logs"
-	@echo "  make test     Run Go tests"
-	@echo "  make tidy     Run go mod tidy"
 	@echo "  make clean    Remove Docker image"
+
+install:
+	npm install
+
+dev:
+	npm run dev
 
 build:
 	docker build -f Dockerfile -t $(IMAGE_NAME):$(IMAGE_TAG) $(ROOT_DIR)
-
-run:
-	go run ./cmd
 
 up: build
 	docker rm -f $(CONTAINER_NAME) >/dev/null 2>&1 || true
 	docker run -d \
 		--name $(CONTAINER_NAME) \
-		--env-file $(ENV_FILE) \
-		-p $(PORT):$(PORT) \
+		-p $(PORT):80 \
 		$(IMAGE_NAME):$(IMAGE_TAG)
 
 down:
@@ -41,12 +41,6 @@ restart: down up
 
 logs:
 	docker logs -f $(CONTAINER_NAME)
-
-test:
-	go test ./...
-
-tidy:
-	go mod tidy
 
 clean:
 	docker rmi -f $(IMAGE_NAME):$(IMAGE_TAG)

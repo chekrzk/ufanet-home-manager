@@ -21,6 +21,10 @@ Thumbs.db
 *.log
 logs/
 
+# Frontend
+front/node_modules/
+front/dist/
+
 # Local data
 data/
 tmp/

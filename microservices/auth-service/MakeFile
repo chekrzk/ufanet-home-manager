@@ -1,10 +1,10 @@
-APP_NAME := api-gateway
+APP_NAME := auth-service
 IMAGE_NAME := ufanet-home-manager/$(APP_NAME)
 IMAGE_TAG ?= local
 CONTAINER_NAME := $(APP_NAME)
-ROOT_DIR := ..
-ENV_FILE ?= .env
-PORT ?= 8086
+ROOT_DIR := ../..
+ENV_FILE ?= resources/env/.env
+PORT ?= 50051
 
 .PHONY: help build run up down restart logs test tidy clean
 

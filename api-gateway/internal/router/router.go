@@ -31,6 +31,7 @@ func New(app *fiber.App, mw *middlewares.Middlewares, h Handlers) *Router {
 
 func (r *Router) Register() {
 	r.app.Use(r.mw.Logger())
+	r.app.Use(r.mw.CORS())
 	r.app.Use(r.mw.RateLimit())
 
 	r.health()
