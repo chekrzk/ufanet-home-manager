@@ -41,6 +41,7 @@ message UpdateRequestStatusRequest {
   ufanet.home_manager.common.v1.UserContext actor = 1;
   string request_id = 2;
   string status = 3;
+  string assigned_to = 4;
 }
 
 message AddRequestCommentRequest {
@@ -48,4 +49,3 @@ message AddRequestCommentRequest {
   string request_id = 2;
   string text = 3;
 }
-

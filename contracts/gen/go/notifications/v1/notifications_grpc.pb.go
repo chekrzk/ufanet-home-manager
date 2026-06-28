@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	NotificationsService_RegisterDevice_FullMethodName   = "/ufanet.home_manager.notifications.v1.NotificationsService/RegisterDevice"
 	NotificationsService_UnregisterDevice_FullMethodName = "/ufanet.home_manager.notifications.v1.NotificationsService/UnregisterDevice"
+	NotificationsService_Publish_FullMethodName          = "/ufanet.home_manager.notifications.v1.NotificationsService/Publish"
 )
 
 // NotificationsServiceClient is the client API for NotificationsService service.
@@ -30,6 +31,7 @@ const (
 type NotificationsServiceClient interface {
 	RegisterDevice(ctx context.Context, in *RegisterDeviceRequest, opts ...grpc.CallOption) (*v1.Empty, error)
 	UnregisterDevice(ctx context.Context, in *UnregisterDeviceRequest, opts ...grpc.CallOption) (*v1.Empty, error)
+	Publish(ctx context.Context, in *PublishNotificationRequest, opts ...grpc.CallOption) (*v1.Empty, error)
 }
 
 type notificationsServiceClient struct {
@@ -60,12 +62,23 @@ func (c *notificationsServiceClient) UnregisterDevice(ctx context.Context, in *U
 	return out, nil
 }
 
+func (c *notificationsServiceClient) Publish(ctx context.Context, in *PublishNotificationRequest, opts ...grpc.CallOption) (*v1.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Empty)
+	err := c.cc.Invoke(ctx, NotificationsService_Publish_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NotificationsServiceServer is the server API for NotificationsService service.
 // All implementations must embed UnimplementedNotificationsServiceServer
 // for forward compatibility.
 type NotificationsServiceServer interface {
 	RegisterDevice(context.Context, *RegisterDeviceRequest) (*v1.Empty, error)
 	UnregisterDevice(context.Context, *UnregisterDeviceRequest) (*v1.Empty, error)
+	Publish(context.Context, *PublishNotificationRequest) (*v1.Empty, error)
 	mustEmbedUnimplementedNotificationsServiceServer()
 }
 
@@ -81,6 +94,9 @@ func (UnimplementedNotificationsServiceServer) RegisterDevice(context.Context, *
 }
 func (UnimplementedNotificationsServiceServer) UnregisterDevice(context.Context, *UnregisterDeviceRequest) (*v1.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method UnregisterDevice not implemented")
+}
+func (UnimplementedNotificationsServiceServer) Publish(context.Context, *PublishNotificationRequest) (*v1.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method Publish not implemented")
 }
 func (UnimplementedNotificationsServiceServer) mustEmbedUnimplementedNotificationsServiceServer() {}
 func (UnimplementedNotificationsServiceServer) testEmbeddedByValue()                              {}
@@ -139,6 +155,24 @@ func _NotificationsService_UnregisterDevice_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NotificationsService_Publish_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PublishNotificationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationsServiceServer).Publish(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NotificationsService_Publish_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationsServiceServer).Publish(ctx, req.(*PublishNotificationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // NotificationsService_ServiceDesc is the grpc.ServiceDesc for NotificationsService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -153,6 +187,10 @@ var NotificationsService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UnregisterDevice",
 			Handler:    _NotificationsService_UnregisterDevice_Handler,
+		},
+		{
+			MethodName: "Publish",
+			Handler:    _NotificationsService_Publish_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

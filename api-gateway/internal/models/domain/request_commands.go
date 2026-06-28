@@ -6,7 +6,8 @@ type CreateRequest struct {
 }
 
 type UpdateRequestStatus struct {
-	Status string
+	Status     string
+	AssignedTo string
 }
 
 type AddRequestComment struct {

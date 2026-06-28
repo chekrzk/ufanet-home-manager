@@ -13,6 +13,7 @@ type Handlers struct {
 	News          NewsHandler
 	Notifications NotificationsHandler
 	Profile       ProfileHandler
+	Requests      RequestsHandler
 }
 
 type Router struct {
@@ -56,9 +57,17 @@ func (r *Router) protected() {
 
 	api.Get("/profile", r.h.Profile.Me)
 	api.Patch("/profile", r.h.Profile.Update)
+	api.Get("/profile/workers", r.mw.Role(constant.RoleAdmin, constant.RoleManager), r.h.Profile.ListWorkers)
+	api.Post("/profile/workers", r.mw.Role(constant.RoleAdmin, constant.RoleManager), r.h.Profile.AddWorker)
 
 	api.Get("/news", r.h.News.List)
-	api.Post("/news", r.mw.Role(constant.RoleAdmin, constant.RoleEmployee), r.h.News.Create)
+	api.Post("/news", r.mw.Role(constant.RoleAdmin, constant.RoleManager), r.h.News.Create)
+
+	api.Get("/requests", r.h.Requests.List)
+	api.Post("/requests", r.h.Requests.Create)
+	api.Get("/requests/:id", r.h.Requests.Get)
+	api.Patch("/requests/:id/status", r.mw.Role(constant.RoleAdmin, constant.RoleManager, constant.RoleEmployee), r.h.Requests.UpdateStatus)
+	api.Post("/requests/:id/comments", r.h.Requests.AddComment)
 
 	api.Post("/notifications/register", r.h.Notifications.Register)
 	api.Delete("/notifications/unregister", r.h.Notifications.Unregister)

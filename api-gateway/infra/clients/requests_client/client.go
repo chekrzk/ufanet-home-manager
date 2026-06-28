@@ -72,9 +72,10 @@ func (c *Client) Get(ctx context.Context, actor domain.AuthContext, requestID st
 func (c *Client) UpdateStatus(ctx context.Context, actor domain.AuthContext, requestID string, command domain.UpdateRequestStatus) (domain.Request, error) {
 	c.log.Debug().Str("user_id", actor.UserID).Str("request_id", requestID).Msg("call requests grpc update status")
 	resp, err := c.client.UpdateRequestStatus(ctx, &requestsv1.UpdateRequestStatusRequest{
-		Actor:     userContext(actor),
-		RequestId: requestID,
-		Status:    command.Status,
+		Actor:      userContext(actor),
+		RequestId:  requestID,
+		Status:     command.Status,
+		AssignedTo: command.AssignedTo,
 	})
 	if err != nil {
 		return domain.Request{}, err
@@ -111,6 +112,7 @@ func requestFromProto(request *commonv1.MaintenanceRequest) domain.Request {
 		Category:    request.GetCategory(),
 		Description: request.GetDescription(),
 		Status:      request.GetStatus(),
+		AssignedTo:  request.GetAssignedTo(),
 		CreatedAt:   timeFromProto(request.GetCreatedAt()),
 		UpdatedAt:   timeFromProto(request.GetUpdatedAt()),
 	}

@@ -20,7 +20,24 @@ func (r *UserRepository) Migrate(ctx context.Context) error {
 	if err := r.db.WithContext(ctx).Exec(`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`).Error; err != nil {
 		return err
 	}
-	return r.db.WithContext(ctx).AutoMigrate(&models.User{})
+	if err := r.db.WithContext(ctx).AutoMigrate(&models.User{}); err != nil {
+		return err
+	}
+	return r.dropProfileColumns(ctx)
+}
+
+func (r *UserRepository) dropProfileColumns(ctx context.Context) error {
+	queries := []string{
+		`ALTER TABLE users DROP COLUMN IF EXISTS full_name`,
+		`ALTER TABLE users DROP COLUMN IF EXISTS house_id`,
+		`ALTER TABLE users DROP COLUMN IF EXISTS apartment`,
+	}
+	for _, query := range queries {
+		if err := r.db.WithContext(ctx).Exec(query).Error; err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (r *UserRepository) Create(ctx context.Context, user *models.User) error {

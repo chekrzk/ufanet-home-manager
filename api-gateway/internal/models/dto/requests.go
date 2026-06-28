@@ -17,7 +17,8 @@ func (r CreateRequestRequest) Validate() map[string]string {
 }
 
 type UpdateRequestStatusRequest struct {
-	Status string `json:"status"`
+	Status     string `json:"status"`
+	AssignedTo string `json:"assigned_to"`
 }
 
 func (r UpdateRequestStatusRequest) Validate() map[string]string {

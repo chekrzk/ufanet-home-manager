@@ -71,6 +71,7 @@ type UpdateProfileRequest struct {
 	User          *v1.UserContext        `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
 	FullName      string                 `protobuf:"bytes,2,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
 	Apartment     string                 `protobuf:"bytes,3,opt,name=apartment,proto3" json:"apartment,omitempty"`
+	HouseId       string                 `protobuf:"bytes,4,opt,name=house_id,json=houseId,proto3" json:"house_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -126,20 +127,222 @@ func (x *UpdateProfileRequest) GetApartment() string {
 	return ""
 }
 
+func (x *UpdateProfileRequest) GetHouseId() string {
+	if x != nil {
+		return x.HouseId
+	}
+	return ""
+}
+
+type AddWorkerRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Actor          *v1.UserContext        `protobuf:"bytes,1,opt,name=actor,proto3" json:"actor,omitempty"`
+	UserId         string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	FullName       string                 `protobuf:"bytes,3,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
+	Specialization string                 `protobuf:"bytes,4,opt,name=specialization,proto3" json:"specialization,omitempty"`
+	Phone          string                 `protobuf:"bytes,5,opt,name=phone,proto3" json:"phone,omitempty"`
+	HouseId        string                 `protobuf:"bytes,6,opt,name=house_id,json=houseId,proto3" json:"house_id,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *AddWorkerRequest) Reset() {
+	*x = AddWorkerRequest{}
+	mi := &file_profile_v1_profile_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AddWorkerRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddWorkerRequest) ProtoMessage() {}
+
+func (x *AddWorkerRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_profile_v1_profile_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddWorkerRequest.ProtoReflect.Descriptor instead.
+func (*AddWorkerRequest) Descriptor() ([]byte, []int) {
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *AddWorkerRequest) GetActor() *v1.UserContext {
+	if x != nil {
+		return x.Actor
+	}
+	return nil
+}
+
+func (x *AddWorkerRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *AddWorkerRequest) GetFullName() string {
+	if x != nil {
+		return x.FullName
+	}
+	return ""
+}
+
+func (x *AddWorkerRequest) GetSpecialization() string {
+	if x != nil {
+		return x.Specialization
+	}
+	return ""
+}
+
+func (x *AddWorkerRequest) GetPhone() string {
+	if x != nil {
+		return x.Phone
+	}
+	return ""
+}
+
+func (x *AddWorkerRequest) GetHouseId() string {
+	if x != nil {
+		return x.HouseId
+	}
+	return ""
+}
+
+type ListWorkersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Actor         *v1.UserContext        `protobuf:"bytes,1,opt,name=actor,proto3" json:"actor,omitempty"`
+	HouseId       string                 `protobuf:"bytes,2,opt,name=house_id,json=houseId,proto3" json:"house_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListWorkersRequest) Reset() {
+	*x = ListWorkersRequest{}
+	mi := &file_profile_v1_profile_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListWorkersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListWorkersRequest) ProtoMessage() {}
+
+func (x *ListWorkersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_profile_v1_profile_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListWorkersRequest.ProtoReflect.Descriptor instead.
+func (*ListWorkersRequest) Descriptor() ([]byte, []int) {
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ListWorkersRequest) GetActor() *v1.UserContext {
+	if x != nil {
+		return x.Actor
+	}
+	return nil
+}
+
+func (x *ListWorkersRequest) GetHouseId() string {
+	if x != nil {
+		return x.HouseId
+	}
+	return ""
+}
+
+type ListWorkersResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*v1.Worker           `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListWorkersResponse) Reset() {
+	*x = ListWorkersResponse{}
+	mi := &file_profile_v1_profile_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListWorkersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListWorkersResponse) ProtoMessage() {}
+
+func (x *ListWorkersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_profile_v1_profile_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListWorkersResponse.ProtoReflect.Descriptor instead.
+func (*ListWorkersResponse) Descriptor() ([]byte, []int) {
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ListWorkersResponse) GetItems() []*v1.Worker {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
 var File_profile_v1_profile_proto protoreflect.FileDescriptor
 
 const file_profile_v1_profile_proto_rawDesc = "" +
 	"\n" +
 	"\x18profile/v1/profile.proto\x12\x1eufanet.home_manager.profile.v1\x1a\x16common/v1/common.proto\"K\n" +
 	"\tMeRequest\x12>\n" +
-	"\x04user\x18\x01 \x01(\v2*.ufanet.home_manager.common.v1.UserContextR\x04user\"\x91\x01\n" +
+	"\x04user\x18\x01 \x01(\v2*.ufanet.home_manager.common.v1.UserContextR\x04user\"\xac\x01\n" +
 	"\x14UpdateProfileRequest\x12>\n" +
 	"\x04user\x18\x01 \x01(\v2*.ufanet.home_manager.common.v1.UserContextR\x04user\x12\x1b\n" +
 	"\tfull_name\x18\x02 \x01(\tR\bfullName\x12\x1c\n" +
-	"\tapartment\x18\x03 \x01(\tR\tapartment2\xcb\x01\n" +
+	"\tapartment\x18\x03 \x01(\tR\tapartment\x12\x19\n" +
+	"\bhouse_id\x18\x04 \x01(\tR\ahouseId\"\xe3\x01\n" +
+	"\x10AddWorkerRequest\x12@\n" +
+	"\x05actor\x18\x01 \x01(\v2*.ufanet.home_manager.common.v1.UserContextR\x05actor\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1b\n" +
+	"\tfull_name\x18\x03 \x01(\tR\bfullName\x12&\n" +
+	"\x0especialization\x18\x04 \x01(\tR\x0especialization\x12\x14\n" +
+	"\x05phone\x18\x05 \x01(\tR\x05phone\x12\x19\n" +
+	"\bhouse_id\x18\x06 \x01(\tR\ahouseId\"q\n" +
+	"\x12ListWorkersRequest\x12@\n" +
+	"\x05actor\x18\x01 \x01(\v2*.ufanet.home_manager.common.v1.UserContextR\x05actor\x12\x19\n" +
+	"\bhouse_id\x18\x02 \x01(\tR\ahouseId\"R\n" +
+	"\x13ListWorkersResponse\x12;\n" +
+	"\x05items\x18\x01 \x03(\v2%.ufanet.home_manager.common.v1.WorkerR\x05items2\xa9\x03\n" +
 	"\x0eProfileService\x12T\n" +
 	"\x02Me\x12).ufanet.home_manager.profile.v1.MeRequest\x1a#.ufanet.home_manager.common.v1.User\x12c\n" +
-	"\x06Update\x124.ufanet.home_manager.profile.v1.UpdateProfileRequest\x1a#.ufanet.home_manager.common.v1.UserBNZLgithub.com/chekrzk/ufanet-home-manager/contracts/gen/go/profile/v1;profilev1b\x06proto3"
+	"\x06Update\x124.ufanet.home_manager.profile.v1.UpdateProfileRequest\x1a#.ufanet.home_manager.common.v1.User\x12d\n" +
+	"\tAddWorker\x120.ufanet.home_manager.profile.v1.AddWorkerRequest\x1a%.ufanet.home_manager.common.v1.Worker\x12v\n" +
+	"\vListWorkers\x122.ufanet.home_manager.profile.v1.ListWorkersRequest\x1a3.ufanet.home_manager.profile.v1.ListWorkersResponseBNZLgithub.com/chekrzk/ufanet-home-manager/contracts/gen/go/profile/v1;profilev1b\x06proto3"
 
 var (
 	file_profile_v1_profile_proto_rawDescOnce sync.Once
@@ -153,25 +356,36 @@ func file_profile_v1_profile_proto_rawDescGZIP() []byte {
 	return file_profile_v1_profile_proto_rawDescData
 }
 
-var file_profile_v1_profile_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_profile_v1_profile_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_profile_v1_profile_proto_goTypes = []any{
 	(*MeRequest)(nil),            // 0: ufanet.home_manager.profile.v1.MeRequest
 	(*UpdateProfileRequest)(nil), // 1: ufanet.home_manager.profile.v1.UpdateProfileRequest
-	(*v1.UserContext)(nil),       // 2: ufanet.home_manager.common.v1.UserContext
-	(*v1.User)(nil),              // 3: ufanet.home_manager.common.v1.User
+	(*AddWorkerRequest)(nil),     // 2: ufanet.home_manager.profile.v1.AddWorkerRequest
+	(*ListWorkersRequest)(nil),   // 3: ufanet.home_manager.profile.v1.ListWorkersRequest
+	(*ListWorkersResponse)(nil),  // 4: ufanet.home_manager.profile.v1.ListWorkersResponse
+	(*v1.UserContext)(nil),       // 5: ufanet.home_manager.common.v1.UserContext
+	(*v1.Worker)(nil),            // 6: ufanet.home_manager.common.v1.Worker
+	(*v1.User)(nil),              // 7: ufanet.home_manager.common.v1.User
 }
 var file_profile_v1_profile_proto_depIdxs = []int32{
-	2, // 0: ufanet.home_manager.profile.v1.MeRequest.user:type_name -> ufanet.home_manager.common.v1.UserContext
-	2, // 1: ufanet.home_manager.profile.v1.UpdateProfileRequest.user:type_name -> ufanet.home_manager.common.v1.UserContext
-	0, // 2: ufanet.home_manager.profile.v1.ProfileService.Me:input_type -> ufanet.home_manager.profile.v1.MeRequest
-	1, // 3: ufanet.home_manager.profile.v1.ProfileService.Update:input_type -> ufanet.home_manager.profile.v1.UpdateProfileRequest
-	3, // 4: ufanet.home_manager.profile.v1.ProfileService.Me:output_type -> ufanet.home_manager.common.v1.User
-	3, // 5: ufanet.home_manager.profile.v1.ProfileService.Update:output_type -> ufanet.home_manager.common.v1.User
-	4, // [4:6] is the sub-list for method output_type
-	2, // [2:4] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	5, // 0: ufanet.home_manager.profile.v1.MeRequest.user:type_name -> ufanet.home_manager.common.v1.UserContext
+	5, // 1: ufanet.home_manager.profile.v1.UpdateProfileRequest.user:type_name -> ufanet.home_manager.common.v1.UserContext
+	5, // 2: ufanet.home_manager.profile.v1.AddWorkerRequest.actor:type_name -> ufanet.home_manager.common.v1.UserContext
+	5, // 3: ufanet.home_manager.profile.v1.ListWorkersRequest.actor:type_name -> ufanet.home_manager.common.v1.UserContext
+	6, // 4: ufanet.home_manager.profile.v1.ListWorkersResponse.items:type_name -> ufanet.home_manager.common.v1.Worker
+	0, // 5: ufanet.home_manager.profile.v1.ProfileService.Me:input_type -> ufanet.home_manager.profile.v1.MeRequest
+	1, // 6: ufanet.home_manager.profile.v1.ProfileService.Update:input_type -> ufanet.home_manager.profile.v1.UpdateProfileRequest
+	2, // 7: ufanet.home_manager.profile.v1.ProfileService.AddWorker:input_type -> ufanet.home_manager.profile.v1.AddWorkerRequest
+	3, // 8: ufanet.home_manager.profile.v1.ProfileService.ListWorkers:input_type -> ufanet.home_manager.profile.v1.ListWorkersRequest
+	7, // 9: ufanet.home_manager.profile.v1.ProfileService.Me:output_type -> ufanet.home_manager.common.v1.User
+	7, // 10: ufanet.home_manager.profile.v1.ProfileService.Update:output_type -> ufanet.home_manager.common.v1.User
+	6, // 11: ufanet.home_manager.profile.v1.ProfileService.AddWorker:output_type -> ufanet.home_manager.common.v1.Worker
+	4, // 12: ufanet.home_manager.profile.v1.ProfileService.ListWorkers:output_type -> ufanet.home_manager.profile.v1.ListWorkersResponse
+	9, // [9:13] is the sub-list for method output_type
+	5, // [5:9] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_profile_v1_profile_proto_init() }
@@ -185,7 +399,7 @@ func file_profile_v1_profile_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_profile_v1_profile_proto_rawDesc), len(file_profile_v1_profile_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
