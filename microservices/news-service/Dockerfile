@@ -8,6 +8,7 @@ RUN go build -o /bin/news-service ./cmd
 
 FROM alpine:3.22
 WORKDIR /app
+RUN apk add --no-cache tzdata
 COPY --from=builder /bin/news-service /app/news-service
 EXPOSE 50052
 CMD ["/app/news-service"]

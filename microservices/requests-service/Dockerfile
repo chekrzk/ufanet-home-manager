@@ -8,6 +8,7 @@ RUN go build -o /bin/requests-service ./cmd
 
 FROM alpine:3.22
 WORKDIR /app
+RUN apk add --no-cache tzdata
 COPY --from=builder /bin/requests-service /app/requests-service
 EXPOSE 50053
 CMD ["/app/requests-service"]
