@@ -11,6 +11,8 @@ service ProfileService {
   rpc Update(UpdateProfileRequest) returns (ufanet.home_manager.common.v1.User);
   rpc AddWorker(AddWorkerRequest) returns (ufanet.home_manager.common.v1.Worker);
   rpc ListWorkers(ListWorkersRequest) returns (ListWorkersResponse);
+  rpc SetWorkerAvailability(SetWorkerAvailabilityRequest) returns (ufanet.home_manager.common.v1.WorkerAvailability);
+  rpc ListWorkerAvailability(ListWorkerAvailabilityRequest) returns (ListWorkerAvailabilityResponse);
 }
 
 message MeRequest {
@@ -40,4 +42,23 @@ message ListWorkersRequest {
 
 message ListWorkersResponse {
   repeated ufanet.home_manager.common.v1.Worker items = 1;
+}
+
+message SetWorkerAvailabilityRequest {
+  ufanet.home_manager.common.v1.UserContext worker = 1;
+  string specialization = 2;
+  string house_id = 3;
+  string available_date = 4;
+  string available_time = 5;
+}
+
+message ListWorkerAvailabilityRequest {
+  ufanet.home_manager.common.v1.UserContext actor = 1;
+  string specialization = 2;
+  string house_id = 3;
+  string available_date = 4;
+}
+
+message ListWorkerAvailabilityResponse {
+  repeated ufanet.home_manager.common.v1.WorkerAvailability items = 1;
 }

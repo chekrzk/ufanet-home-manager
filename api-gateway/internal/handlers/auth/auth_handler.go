@@ -40,11 +40,10 @@ func (h *Handler) Register(c *fiber.Ctx) error {
 	}
 
 	user, err := h.service.Register(c.Context(), domain.RegisterUser{
-		Phone:     req.Phone,
-		Password:  req.Password,
-		FullName:  req.FullName,
-		HouseID:   req.HouseID,
-		Apartment: req.Apartment,
+		Phone:    req.Phone,
+		Password: req.Password,
+		FullName: req.FullName,
+		Role:     req.Role,
 	})
 	if err != nil {
 		return gwerrors.FromGRPC(err)

@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	stderrors "errors"
+	"time"
 
 	commonv1 "github.com/chekrzk/ufanet-home-manager/contracts/gen/go/common/v1"
 	requestsv1 "github.com/chekrzk/ufanet-home-manager/contracts/gen/go/requests/v1"
@@ -24,9 +25,14 @@ func New(service RequestsService) *Server {
 
 func (s *Server) CreateRequest(ctx context.Context, req *requestsv1.CreateRequestRequest) (*commonv1.MaintenanceRequest, error) {
 	request, err := s.service.Create(ctx, models.CreateRequestCommand{
-		User:        userContext(req.GetUser()),
-		Category:    req.GetCategory(),
-		Description: req.GetDescription(),
+		User:             userContext(req.GetUser()),
+		Category:         req.GetCategory(),
+		Description:      req.GetDescription(),
+		PreferredDate:    req.GetPreferredDate(),
+		AssignedWorkerID: req.GetAssignedWorkerId(),
+		Address:          req.GetAddress(),
+		Apartment:        req.GetApartment(),
+		Phone:            req.GetPhone(),
 	})
 	if err != nil {
 		return nil, grpcError(err)
@@ -94,15 +100,29 @@ func userContext(user *commonv1.UserContext) models.UserContext {
 
 func requestToProto(request models.MaintenanceRequest) *commonv1.MaintenanceRequest {
 	return &commonv1.MaintenanceRequest{
-		Id:          request.ID,
-		UserId:      request.UserID,
-		Category:    request.Category,
-		Description: request.Description,
-		Status:      request.Status,
-		CreatedAt:   timestamppb.New(request.CreatedAt),
-		UpdatedAt:   timestamppb.New(request.UpdatedAt),
-		AssignedTo:  request.AssignedTo,
+		Id:            request.ID,
+		UserId:        request.UserID,
+		Category:      request.Category,
+		Description:   request.Description,
+		Status:        request.Status,
+		CreatedAt:     timestamppb.New(request.CreatedAt),
+		UpdatedAt:     timestamppb.New(request.UpdatedAt),
+		AssignedTo:    request.AssignedTo,
+		PreferredDate: request.PreferredDate,
+		Address:       request.Address,
+		Apartment:     request.Apartment,
+		Phone:         request.Phone,
+		AcceptedAt:    timeToProto(request.AcceptedAt),
+		DeclinedAt:    timeToProto(request.DeclinedAt),
+		CompletedAt:   timeToProto(request.CompletedAt),
 	}
+}
+
+func timeToProto(value *time.Time) *timestamppb.Timestamp {
+	if value == nil {
+		return nil
+	}
+	return timestamppb.New(*value)
 }
 
 func grpcError(err error) error {

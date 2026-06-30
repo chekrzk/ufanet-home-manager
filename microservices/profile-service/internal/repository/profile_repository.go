@@ -20,7 +20,7 @@ func (r *ProfileRepository) Migrate(ctx context.Context) error {
 	if err := r.db.WithContext(ctx).Exec(`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`).Error; err != nil {
 		return err
 	}
-	return r.db.WithContext(ctx).AutoMigrate(&models.Profile{}, &models.Worker{})
+	return r.db.WithContext(ctx).AutoMigrate(&models.Profile{}, &models.Worker{}, &models.WorkerAvailability{})
 }
 
 func (r *ProfileRepository) FindProfile(ctx context.Context, userID string) (models.Profile, error) {
@@ -50,4 +50,23 @@ func (r *ProfileRepository) ListWorkers(ctx context.Context, houseID string) ([]
 		query = query.Where("house_id = ?", houseID)
 	}
 	return workers, query.Find(&workers).Error
+}
+
+func (r *ProfileRepository) SaveWorkerAvailability(ctx context.Context, availability *models.WorkerAvailability) error {
+	return r.db.WithContext(ctx).Create(availability).Error
+}
+
+func (r *ProfileRepository) ListWorkerAvailability(ctx context.Context, filter models.ListWorkerAvailabilityFilter) ([]models.WorkerAvailability, error) {
+	var items []models.WorkerAvailability
+	query := r.db.WithContext(ctx).Order("created_at DESC")
+	if filter.Specialization != "" {
+		query = query.Where("specialization = ?", filter.Specialization)
+	}
+	if filter.HouseID != "" {
+		query = query.Where("house_id = ?", filter.HouseID)
+	}
+	if filter.AvailableDate != "" {
+		query = query.Where("available_date = ?", filter.AvailableDate)
+	}
+	return items, query.Find(&items).Error
 }

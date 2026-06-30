@@ -70,6 +70,37 @@ func (s *Server) ListWorkers(ctx context.Context, req *profilev1.ListWorkersRequ
 	return &profilev1.ListWorkersResponse{Items: items}, nil
 }
 
+func (s *Server) SetWorkerAvailability(ctx context.Context, req *profilev1.SetWorkerAvailabilityRequest) (*commonv1.WorkerAvailability, error) {
+	availability, err := s.service.SetWorkerAvailability(ctx, models.SetWorkerAvailabilityCommand{
+		Worker:        userContext(req.GetWorker()),
+		Specialization: req.GetSpecialization(),
+		HouseID:       req.GetHouseId(),
+		AvailableDate: req.GetAvailableDate(),
+		AvailableTime: req.GetAvailableTime(),
+	})
+	if err != nil {
+		return nil, grpcError(err)
+	}
+	return availabilityToProto(availability), nil
+}
+
+func (s *Server) ListWorkerAvailability(ctx context.Context, req *profilev1.ListWorkerAvailabilityRequest) (*profilev1.ListWorkerAvailabilityResponse, error) {
+	items, err := s.service.ListWorkerAvailability(ctx, models.ListWorkerAvailabilityFilter{
+		Actor:          userContext(req.GetActor()),
+		Specialization: req.GetSpecialization(),
+		HouseID:        req.GetHouseId(),
+		AvailableDate:  req.GetAvailableDate(),
+	})
+	if err != nil {
+		return nil, grpcError(err)
+	}
+	respItems := make([]*commonv1.WorkerAvailability, 0, len(items))
+	for _, item := range items {
+		respItems = append(respItems, availabilityToProto(item))
+	}
+	return &profilev1.ListWorkerAvailabilityResponse{Items: respItems}, nil
+}
+
 func userContext(user *commonv1.UserContext) models.UserContext {
 	if user == nil {
 		return models.UserContext{}
@@ -90,6 +121,19 @@ func workerToProto(worker models.Worker) *commonv1.Worker {
 		Phone:          worker.Phone,
 		HouseId:        worker.HouseID,
 		CreatedAt:      timestamppb.New(worker.CreatedAt),
+	}
+}
+
+func availabilityToProto(item models.WorkerAvailability) *commonv1.WorkerAvailability {
+	return &commonv1.WorkerAvailability{
+		Id:             item.ID,
+		WorkerId:       item.WorkerID,
+		UserId:         item.UserID,
+		Specialization: item.Specialization,
+		HouseId:        item.HouseID,
+		AvailableDate:  item.AvailableDate,
+		AvailableTime:  item.AvailableTime,
+		CreatedAt:      timestamppb.New(item.CreatedAt),
 	}
 }
 

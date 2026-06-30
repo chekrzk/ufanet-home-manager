@@ -73,6 +73,38 @@ func (h *Handler) ListWorkers(c *fiber.Ctx) error {
 	return gwerrors.OK(c, workers)
 }
 
+func (h *Handler) SetWorkerAvailability(c *fiber.Ctx) error {
+	req, err := gwerrors.ParseBody[dto.SetWorkerAvailabilityRequest](c)
+	if err != nil {
+		return err
+	}
+
+	availability, err := h.service.SetWorkerAvailability(c.Context(), authContext(c), domain.SetWorkerAvailability{
+		Specialization: req.Specialization,
+		HouseID:        req.HouseID,
+		AvailableDate:  req.AvailableDate,
+		AvailableTime:  req.AvailableTime,
+	})
+	if err != nil {
+		return gwerrors.FromGRPC(err)
+	}
+
+	return gwerrors.Created(c, availability)
+}
+
+func (h *Handler) ListWorkerAvailability(c *fiber.Ctx) error {
+	items, err := h.service.ListWorkerAvailability(c.Context(), authContext(c), domain.WorkerAvailabilityFilter{
+		HouseID:        c.Query("house_id"),
+		Specialization: c.Query("specialization"),
+		AvailableDate:  c.Query("available_date"),
+	})
+	if err != nil {
+		return gwerrors.FromGRPC(err)
+	}
+
+	return gwerrors.OK(c, items)
+}
+
 func authContext(c *fiber.Ctx) domain.AuthContext {
 	userID, _ := c.Locals(constant.CtxUserID).(string)
 	role, _ := c.Locals(constant.CtxRole).(string)

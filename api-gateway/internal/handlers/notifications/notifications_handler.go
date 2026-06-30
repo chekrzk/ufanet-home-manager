@@ -48,6 +48,29 @@ func (h *Handler) Unregister(c *fiber.Ctx) error {
 	return gwerrors.NoContent(c)
 }
 
+func (h *Handler) List(c *fiber.Ctx) error {
+	var req dto.Pagination
+	if err := c.QueryParser(&req); err != nil {
+		return gwerrors.New(fiber.StatusBadRequest, "invalid_query", "invalid query params")
+	}
+	req.Normalize()
+
+	page, err := h.service.List(c.Context(), authContext(c), domain.Pagination{Page: req.Page, Limit: req.Limit})
+	if err != nil {
+		return gwerrors.FromGRPC(err)
+	}
+
+	return gwerrors.OK(c, page)
+}
+
+func (h *Handler) MarkRead(c *fiber.Ctx) error {
+	if err := h.service.MarkRead(c.Context(), authContext(c), c.Params("id")); err != nil {
+		return gwerrors.FromGRPC(err)
+	}
+
+	return gwerrors.NoContent(c)
+}
+
 func authContext(c *fiber.Ctx) domain.AuthContext {
 	userID, _ := c.Locals(constant.CtxUserID).(string)
 	role, _ := c.Locals(constant.CtxRole).(string)

@@ -38,11 +38,10 @@ func (c *Client) Login(ctx context.Context, credentials domain.LoginCredentials)
 func (c *Client) Register(ctx context.Context, user domain.RegisterUser) (domain.User, error) {
 	c.log.Debug().Msg("call auth grpc register")
 	resp, err := c.client.Register(ctx, &authv1.RegisterRequest{
-		Phone:     user.Phone,
-		Password:  user.Password,
-		FullName:  user.FullName,
-		HouseId:   user.HouseID,
-		Apartment: user.Apartment,
+		Phone:    user.Phone,
+		Password: user.Password,
+		FullName: user.FullName,
+		Role:     user.Role,
 	})
 	if err != nil {
 		return domain.User{}, err

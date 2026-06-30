@@ -11,4 +11,6 @@ type ProfileRepository interface {
 	SaveProfile(ctx context.Context, profile *models.Profile) error
 	CreateWorker(ctx context.Context, worker *models.Worker) error
 	ListWorkers(ctx context.Context, houseID string) ([]models.Worker, error)
+	SaveWorkerAvailability(ctx context.Context, availability *models.WorkerAvailability) error
+	ListWorkerAvailability(ctx context.Context, filter models.ListWorkerAvailabilityFilter) ([]models.WorkerAvailability, error)
 }

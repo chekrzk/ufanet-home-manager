@@ -6,11 +6,10 @@ type LoginCredentials struct {
 }
 
 type RegisterUser struct {
-	Phone     string
-	Password  string
-	FullName  string
-	HouseID   string
-	Apartment string
+	Phone    string
+	Password string
+	FullName string
+	Role     string
 }
 
 type AuthTokens struct {

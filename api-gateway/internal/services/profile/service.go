@@ -35,3 +35,13 @@ func (s *Service) ListWorkers(ctx context.Context, actor domain.AuthContext, hou
 	s.log.Debug().Str("user_id", actor.UserID).Str("house_id", houseID).Msg("list workers via profile service")
 	return s.client.ListWorkers(ctx, actor, houseID)
 }
+
+func (s *Service) SetWorkerAvailability(ctx context.Context, actor domain.AuthContext, command domain.SetWorkerAvailability) (domain.WorkerAvailability, error) {
+	s.log.Debug().Str("user_id", actor.UserID).Str("house_id", command.HouseID).Msg("set worker availability via profile service")
+	return s.client.SetWorkerAvailability(ctx, actor, command)
+}
+
+func (s *Service) ListWorkerAvailability(ctx context.Context, actor domain.AuthContext, filter domain.WorkerAvailabilityFilter) ([]domain.WorkerAvailability, error) {
+	s.log.Debug().Str("user_id", actor.UserID).Str("house_id", filter.HouseID).Msg("list worker availability via profile service")
+	return s.client.ListWorkerAvailability(ctx, actor, filter)
+}

@@ -36,6 +36,7 @@ func (s *Server) Register(ctx context.Context, req *authv1.RegisterRequest) (*co
 	user, err := s.service.Register(ctx, models.RegisterCommand{
 		Phone:    req.GetPhone(),
 		Password: req.GetPassword(),
+		Role:     req.GetRole(),
 	})
 	if err != nil {
 		return nil, grpcError(err)

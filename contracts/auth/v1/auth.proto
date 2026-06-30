@@ -23,6 +23,7 @@ message RegisterRequest {
   string full_name = 3;
   string house_id = 4;
   string apartment = 5;
+  string role = 6;
 }
 
 message RefreshRequest {
@@ -34,4 +35,3 @@ message AuthTokens {
   string refresh_token = 2;
   int64 expires_in = 3;
 }
-

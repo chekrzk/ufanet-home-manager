@@ -24,9 +24,14 @@ func New(conn *grpc.ClientConn, log zerolog.Logger) *Client {
 func (c *Client) Create(ctx context.Context, actor domain.AuthContext, command domain.CreateRequest) (domain.Request, error) {
 	c.log.Debug().Str("user_id", actor.UserID).Msg("call requests grpc create")
 	resp, err := c.client.CreateRequest(ctx, &requestsv1.CreateRequestRequest{
-		User:        userContext(actor),
-		Category:    command.Category,
-		Description: command.Description,
+		User:             userContext(actor),
+		Category:         command.Category,
+		Description:      command.Description,
+		PreferredDate:    command.PreferredDate,
+		AssignedWorkerId: command.AssignedWorkerID,
+		Address:          command.Address,
+		Apartment:        command.Apartment,
+		Phone:            command.Phone,
 	})
 	if err != nil {
 		return domain.Request{}, err
@@ -107,14 +112,21 @@ func requestFromProto(request *commonv1.MaintenanceRequest) domain.Request {
 		return domain.Request{}
 	}
 	return domain.Request{
-		ID:          request.GetId(),
-		UserID:      request.GetUserId(),
-		Category:    request.GetCategory(),
-		Description: request.GetDescription(),
-		Status:      request.GetStatus(),
-		AssignedTo:  request.GetAssignedTo(),
-		CreatedAt:   timeFromProto(request.GetCreatedAt()),
-		UpdatedAt:   timeFromProto(request.GetUpdatedAt()),
+		ID:            request.GetId(),
+		UserID:        request.GetUserId(),
+		Category:      request.GetCategory(),
+		Description:   request.GetDescription(),
+		Status:        request.GetStatus(),
+		AssignedTo:    request.GetAssignedTo(),
+		PreferredDate: request.GetPreferredDate(),
+		Address:       request.GetAddress(),
+		Apartment:     request.GetApartment(),
+		Phone:         request.GetPhone(),
+		AcceptedAt:    timeFromProto(request.GetAcceptedAt()),
+		DeclinedAt:    timeFromProto(request.GetDeclinedAt()),
+		CompletedAt:   timeFromProto(request.GetCompletedAt()),
+		CreatedAt:     timeFromProto(request.GetCreatedAt()),
+		UpdatedAt:     timeFromProto(request.GetUpdatedAt()),
 	}
 }
 
