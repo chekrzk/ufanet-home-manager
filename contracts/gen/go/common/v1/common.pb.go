@@ -331,6 +331,7 @@ type MaintenanceRequest struct {
 	Status        string                 `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	AssignedTo    string                 `protobuf:"bytes,8,opt,name=assigned_to,json=assignedTo,proto3" json:"assigned_to,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -414,6 +415,105 @@ func (x *MaintenanceRequest) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *MaintenanceRequest) GetAssignedTo() string {
+	if x != nil {
+		return x.AssignedTo
+	}
+	return ""
+}
+
+type Worker struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Id             string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId         string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	FullName       string                 `protobuf:"bytes,3,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
+	Specialization string                 `protobuf:"bytes,4,opt,name=specialization,proto3" json:"specialization,omitempty"`
+	Phone          string                 `protobuf:"bytes,5,opt,name=phone,proto3" json:"phone,omitempty"`
+	HouseId        string                 `protobuf:"bytes,6,opt,name=house_id,json=houseId,proto3" json:"house_id,omitempty"`
+	CreatedAt      *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *Worker) Reset() {
+	*x = Worker{}
+	mi := &file_common_v1_common_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Worker) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Worker) ProtoMessage() {}
+
+func (x *Worker) ProtoReflect() protoreflect.Message {
+	mi := &file_common_v1_common_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Worker.ProtoReflect.Descriptor instead.
+func (*Worker) Descriptor() ([]byte, []int) {
+	return file_common_v1_common_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *Worker) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Worker) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *Worker) GetFullName() string {
+	if x != nil {
+		return x.FullName
+	}
+	return ""
+}
+
+func (x *Worker) GetSpecialization() string {
+	if x != nil {
+		return x.Specialization
+	}
+	return ""
+}
+
+func (x *Worker) GetPhone() string {
+	if x != nil {
+		return x.Phone
+	}
+	return ""
+}
+
+func (x *Worker) GetHouseId() string {
+	if x != nil {
+		return x.HouseId
+	}
+	return ""
+}
+
+func (x *Worker) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
 var File_common_v1_common_proto protoreflect.FileDescriptor
 
 const file_common_v1_common_proto_rawDesc = "" +
@@ -440,7 +540,7 @@ const file_common_v1_common_proto_rawDesc = "" +
 	"\x04body\x18\x03 \x01(\tR\x04body\x12\x19\n" +
 	"\bhouse_id\x18\x04 \x01(\tR\ahouseId\x129\n" +
 	"\n" +
-	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\x89\x02\n" +
+	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\xaa\x02\n" +
 	"\x12MaintenanceRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1a\n" +
@@ -450,7 +550,18 @@ const file_common_v1_common_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAtBLZJgithub.com/chekrzk/ufanet-home-manager/contracts/gen/go/common/v1;commonv1b\x06proto3"
+	"updated_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x1f\n" +
+	"\vassigned_to\x18\b \x01(\tR\n" +
+	"assignedTo\"\xe2\x01\n" +
+	"\x06Worker\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1b\n" +
+	"\tfull_name\x18\x03 \x01(\tR\bfullName\x12&\n" +
+	"\x0especialization\x18\x04 \x01(\tR\x0especialization\x12\x14\n" +
+	"\x05phone\x18\x05 \x01(\tR\x05phone\x12\x19\n" +
+	"\bhouse_id\x18\x06 \x01(\tR\ahouseId\x129\n" +
+	"\n" +
+	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAtBLZJgithub.com/chekrzk/ufanet-home-manager/contracts/gen/go/common/v1;commonv1b\x06proto3"
 
 var (
 	file_common_v1_common_proto_rawDescOnce sync.Once
@@ -464,7 +575,7 @@ func file_common_v1_common_proto_rawDescGZIP() []byte {
 	return file_common_v1_common_proto_rawDescData
 }
 
-var file_common_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_common_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_common_v1_common_proto_goTypes = []any{
 	(*Empty)(nil),                 // 0: ufanet.home_manager.common.v1.Empty
 	(*UserContext)(nil),           // 1: ufanet.home_manager.common.v1.UserContext
@@ -472,17 +583,19 @@ var file_common_v1_common_proto_goTypes = []any{
 	(*User)(nil),                  // 3: ufanet.home_manager.common.v1.User
 	(*News)(nil),                  // 4: ufanet.home_manager.common.v1.News
 	(*MaintenanceRequest)(nil),    // 5: ufanet.home_manager.common.v1.MaintenanceRequest
-	(*timestamppb.Timestamp)(nil), // 6: google.protobuf.Timestamp
+	(*Worker)(nil),                // 6: ufanet.home_manager.common.v1.Worker
+	(*timestamppb.Timestamp)(nil), // 7: google.protobuf.Timestamp
 }
 var file_common_v1_common_proto_depIdxs = []int32{
-	6, // 0: ufanet.home_manager.common.v1.News.created_at:type_name -> google.protobuf.Timestamp
-	6, // 1: ufanet.home_manager.common.v1.MaintenanceRequest.created_at:type_name -> google.protobuf.Timestamp
-	6, // 2: ufanet.home_manager.common.v1.MaintenanceRequest.updated_at:type_name -> google.protobuf.Timestamp
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	7, // 0: ufanet.home_manager.common.v1.News.created_at:type_name -> google.protobuf.Timestamp
+	7, // 1: ufanet.home_manager.common.v1.MaintenanceRequest.created_at:type_name -> google.protobuf.Timestamp
+	7, // 2: ufanet.home_manager.common.v1.MaintenanceRequest.updated_at:type_name -> google.protobuf.Timestamp
+	7, // 3: ufanet.home_manager.common.v1.Worker.created_at:type_name -> google.protobuf.Timestamp
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_common_v1_common_proto_init() }
@@ -496,7 +609,7 @@ func file_common_v1_common_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_common_v1_common_proto_rawDesc), len(file_common_v1_common_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

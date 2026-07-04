@@ -259,6 +259,7 @@ type UpdateRequestStatusRequest struct {
 	Actor         *v1.UserContext        `protobuf:"bytes,1,opt,name=actor,proto3" json:"actor,omitempty"`
 	RequestId     string                 `protobuf:"bytes,2,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
+	AssignedTo    string                 `protobuf:"bytes,4,opt,name=assigned_to,json=assignedTo,proto3" json:"assigned_to,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -310,6 +311,13 @@ func (x *UpdateRequestStatusRequest) GetRequestId() string {
 func (x *UpdateRequestStatusRequest) GetStatus() string {
 	if x != nil {
 		return x.Status
+	}
+	return ""
+}
+
+func (x *UpdateRequestStatusRequest) GetAssignedTo() string {
+	if x != nil {
+		return x.AssignedTo
 	}
 	return ""
 }
@@ -396,12 +404,14 @@ const file_requests_v1_requests_proto_rawDesc = "" +
 	"\x11GetRequestRequest\x12>\n" +
 	"\x04user\x18\x01 \x01(\v2*.ufanet.home_manager.common.v1.UserContextR\x04user\x12\x1d\n" +
 	"\n" +
-	"request_id\x18\x02 \x01(\tR\trequestId\"\x95\x01\n" +
+	"request_id\x18\x02 \x01(\tR\trequestId\"\xb6\x01\n" +
 	"\x1aUpdateRequestStatusRequest\x12@\n" +
 	"\x05actor\x18\x01 \x01(\v2*.ufanet.home_manager.common.v1.UserContextR\x05actor\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x02 \x01(\tR\trequestId\x12\x16\n" +
-	"\x06status\x18\x03 \x01(\tR\x06status\"\x8d\x01\n" +
+	"\x06status\x18\x03 \x01(\tR\x06status\x12\x1f\n" +
+	"\vassigned_to\x18\x04 \x01(\tR\n" +
+	"assignedTo\"\x8d\x01\n" +
 	"\x18AddRequestCommentRequest\x12>\n" +
 	"\x04user\x18\x01 \x01(\v2*.ufanet.home_manager.common.v1.UserContextR\x04user\x12\x1d\n" +
 	"\n" +

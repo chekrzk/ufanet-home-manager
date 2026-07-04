@@ -8,6 +8,7 @@ type Request struct {
 	Category    string    `json:"category"`
 	Description string    `json:"description"`
 	Status      string    `json:"status"`
+	AssignedTo  string    `json:"assigned_to,omitempty"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }

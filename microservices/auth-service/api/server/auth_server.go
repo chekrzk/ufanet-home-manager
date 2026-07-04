@@ -6,7 +6,6 @@ import (
 
 	apperrors "github.com/chekrzk/ufanet-home-manager/auth-service/internal/errors"
 	"github.com/chekrzk/ufanet-home-manager/auth-service/internal/models"
-	"github.com/chekrzk/ufanet-home-manager/auth-service/internal/service"
 	authv1 "github.com/chekrzk/ufanet-home-manager/contracts/gen/go/auth/v1"
 	commonv1 "github.com/chekrzk/ufanet-home-manager/contracts/gen/go/common/v1"
 	"google.golang.org/grpc/codes"
@@ -15,15 +14,15 @@ import (
 
 type Server struct {
 	authv1.UnimplementedAuthServiceServer
-	service *service.AuthService
+	service AuthService
 }
 
-func New(service *service.AuthService) *Server {
+func New(service AuthService) *Server {
 	return &Server{service: service}
 }
 
 func (s *Server) Login(ctx context.Context, req *authv1.LoginRequest) (*authv1.AuthTokens, error) {
-	tokens, err := s.service.Login(ctx, service.LoginCommand{
+	tokens, err := s.service.Login(ctx, models.LoginCommand{
 		Phone:    req.GetPhone(),
 		Password: req.GetPassword(),
 	})
@@ -34,12 +33,9 @@ func (s *Server) Login(ctx context.Context, req *authv1.LoginRequest) (*authv1.A
 }
 
 func (s *Server) Register(ctx context.Context, req *authv1.RegisterRequest) (*commonv1.User, error) {
-	user, err := s.service.Register(ctx, service.RegisterCommand{
-		Phone:     req.GetPhone(),
-		Password:  req.GetPassword(),
-		FullName:  req.GetFullName(),
-		HouseID:   req.GetHouseId(),
-		Apartment: req.GetApartment(),
+	user, err := s.service.Register(ctx, models.RegisterCommand{
+		Phone:    req.GetPhone(),
+		Password: req.GetPassword(),
 	})
 	if err != nil {
 		return nil, grpcError(err)
@@ -65,12 +61,9 @@ func tokensToProto(accessToken string, refreshToken string, expiresIn int64) *au
 
 func userToProto(user models.User) *commonv1.User {
 	return &commonv1.User{
-		Id:        user.ID,
-		Phone:     user.Phone,
-		FullName:  user.FullName,
-		Role:      string(user.Role),
-		HouseId:   user.HouseID,
-		Apartment: user.Apartment,
+		Id:    user.ID,
+		Phone: user.Phone,
+		Role:  string(user.Role),
 	}
 }
 

@@ -47,7 +47,6 @@ type LogConfig struct {
 
 func Load() (*Config, error) {
 	_ = godotenv.Load()
-	_ = godotenv.Load("resources/env/.env")
 
 	var cfg Config
 	if err := envconfig.Process("", &cfg); err != nil {

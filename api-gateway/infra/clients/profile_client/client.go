@@ -33,12 +33,45 @@ func (c *Client) Update(ctx context.Context, actor domain.AuthContext, command d
 	resp, err := c.client.Update(ctx, &profilev1.UpdateProfileRequest{
 		User:      userContext(actor),
 		FullName:  command.FullName,
+		HouseId:   command.HouseID,
 		Apartment: command.Apartment,
 	})
 	if err != nil {
 		return domain.User{}, err
 	}
 	return userFromProto(resp), nil
+}
+
+func (c *Client) AddWorker(ctx context.Context, actor domain.AuthContext, command domain.AddWorker) (domain.Worker, error) {
+	c.log.Debug().Str("user_id", actor.UserID).Msg("call profile grpc add worker")
+	resp, err := c.client.AddWorker(ctx, &profilev1.AddWorkerRequest{
+		Actor:          userContext(actor),
+		UserId:         command.UserID,
+		FullName:       command.FullName,
+		Specialization: command.Specialization,
+		Phone:          command.Phone,
+		HouseId:        command.HouseID,
+	})
+	if err != nil {
+		return domain.Worker{}, err
+	}
+	return workerFromProto(resp), nil
+}
+
+func (c *Client) ListWorkers(ctx context.Context, actor domain.AuthContext, houseID string) ([]domain.Worker, error) {
+	c.log.Debug().Str("user_id", actor.UserID).Str("house_id", houseID).Msg("call profile grpc list workers")
+	resp, err := c.client.ListWorkers(ctx, &profilev1.ListWorkersRequest{
+		Actor:   userContext(actor),
+		HouseId: houseID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	items := make([]domain.Worker, 0, len(resp.GetItems()))
+	for _, item := range resp.GetItems() {
+		items = append(items, workerFromProto(item))
+	}
+	return items, nil
 }
 
 func userContext(actor domain.AuthContext) *commonv1.UserContext {
@@ -56,5 +89,19 @@ func userFromProto(user *commonv1.User) domain.User {
 		Role:      user.GetRole(),
 		HouseID:   user.GetHouseId(),
 		Apartment: user.GetApartment(),
+	}
+}
+
+func workerFromProto(worker *commonv1.Worker) domain.Worker {
+	if worker == nil {
+		return domain.Worker{}
+	}
+	return domain.Worker{
+		ID:             worker.GetId(),
+		UserID:         worker.GetUserId(),
+		FullName:       worker.GetFullName(),
+		Specialization: worker.GetSpecialization(),
+		Phone:          worker.GetPhone(),
+		HouseID:        worker.GetHouseId(),
 	}
 }

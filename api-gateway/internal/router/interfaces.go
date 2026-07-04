@@ -27,4 +27,14 @@ type NotificationsHandler interface {
 type ProfileHandler interface {
 	Me(c *fiber.Ctx) error
 	Update(c *fiber.Ctx) error
+	AddWorker(c *fiber.Ctx) error
+	ListWorkers(c *fiber.Ctx) error
+}
+
+type RequestsHandler interface {
+	Create(c *fiber.Ctx) error
+	List(c *fiber.Ctx) error
+	Get(c *fiber.Ctx) error
+	UpdateStatus(c *fiber.Ctx) error
+	AddComment(c *fiber.Ctx) error
 }

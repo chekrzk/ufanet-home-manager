@@ -34,6 +34,7 @@ func (h *Handler) Update(c *fiber.Ctx) error {
 
 	user, err := h.service.Update(c.Context(), authContext(c), domain.UpdateProfile{
 		FullName:  req.FullName,
+		HouseID:   req.HouseID,
 		Apartment: req.Apartment,
 	})
 	if err != nil {
@@ -41,6 +42,35 @@ func (h *Handler) Update(c *fiber.Ctx) error {
 	}
 
 	return gwerrors.OK(c, user)
+}
+
+func (h *Handler) AddWorker(c *fiber.Ctx) error {
+	req, err := gwerrors.ParseBody[dto.AddWorkerRequest](c)
+	if err != nil {
+		return err
+	}
+
+	worker, err := h.service.AddWorker(c.Context(), authContext(c), domain.AddWorker{
+		UserID:         req.UserID,
+		FullName:       req.FullName,
+		Specialization: req.Specialization,
+		Phone:          req.Phone,
+		HouseID:        req.HouseID,
+	})
+	if err != nil {
+		return gwerrors.FromGRPC(err)
+	}
+
+	return gwerrors.Created(c, worker)
+}
+
+func (h *Handler) ListWorkers(c *fiber.Ctx) error {
+	workers, err := h.service.ListWorkers(c.Context(), authContext(c), c.Query("house_id"))
+	if err != nil {
+		return gwerrors.FromGRPC(err)
+	}
+
+	return gwerrors.OK(c, workers)
 }
 
 func authContext(c *fiber.Ctx) domain.AuthContext {

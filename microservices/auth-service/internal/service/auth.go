@@ -11,26 +11,6 @@ import (
 	"github.com/rs/zerolog"
 )
 
-type UserRepository interface {
-	Create(ctx context.Context, user *models.User) error
-	FindByPhone(ctx context.Context, phone string) (models.User, error)
-	FindByID(ctx context.Context, id string) (models.User, error)
-	ExistsByPhone(ctx context.Context, phone string) (bool, error)
-}
-
-type RegisterCommand struct {
-	Phone     string
-	Password  string
-	FullName  string
-	HouseID   string
-	Apartment string
-}
-
-type LoginCommand struct {
-	Phone    string
-	Password string
-}
-
 type AuthService struct {
 	users  UserRepository
 	hasher *hasher.Hasher
@@ -42,7 +22,7 @@ func NewAuthService(users UserRepository, hasher *hasher.Hasher, tokens *jwtmana
 	return &AuthService{users: users, hasher: hasher, tokens: tokens, log: log}
 }
 
-func (s *AuthService) Register(ctx context.Context, cmd RegisterCommand) (models.User, error) {
+func (s *AuthService) Register(ctx context.Context, cmd models.RegisterCommand) (models.User, error) {
 	if err := validateRegister(cmd); err != nil {
 		return models.User{}, err
 	}
@@ -63,10 +43,7 @@ func (s *AuthService) Register(ctx context.Context, cmd RegisterCommand) (models
 	user := models.User{
 		Phone:        strings.TrimSpace(cmd.Phone),
 		PasswordHash: hash,
-		FullName:     strings.TrimSpace(cmd.FullName),
 		Role:         models.RoleResident,
-		HouseID:      strings.TrimSpace(cmd.HouseID),
-		Apartment:    strings.TrimSpace(cmd.Apartment),
 	}
 	if err := s.users.Create(ctx, &user); err != nil {
 		return models.User{}, err
@@ -76,7 +53,7 @@ func (s *AuthService) Register(ctx context.Context, cmd RegisterCommand) (models
 	return user, nil
 }
 
-func (s *AuthService) Login(ctx context.Context, cmd LoginCommand) (jwtmanager.Pair, error) {
+func (s *AuthService) Login(ctx context.Context, cmd models.LoginCommand) (jwtmanager.Pair, error) {
 	if strings.TrimSpace(cmd.Phone) == "" || cmd.Password == "" {
 		return jwtmanager.Pair{}, apperrors.ErrInvalidArgument
 	}
@@ -110,8 +87,8 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (jwtmana
 	return s.tokens.NewPair(user)
 }
 
-func validateRegister(cmd RegisterCommand) error {
-	if strings.TrimSpace(cmd.Phone) == "" || cmd.Password == "" || strings.TrimSpace(cmd.FullName) == "" {
+func validateRegister(cmd models.RegisterCommand) error {
+	if strings.TrimSpace(cmd.Phone) == "" || cmd.Password == "" {
 		return apperrors.ErrInvalidArgument
 	}
 	if len(cmd.Password) < 6 {

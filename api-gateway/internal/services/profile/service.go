@@ -25,3 +25,13 @@ func (s *Service) Update(ctx context.Context, actor domain.AuthContext, command 
 	s.log.Debug().Str("user_id", actor.UserID).Msg("update profile via profile service")
 	return s.client.Update(ctx, actor, command)
 }
+
+func (s *Service) AddWorker(ctx context.Context, actor domain.AuthContext, command domain.AddWorker) (domain.Worker, error) {
+	s.log.Debug().Str("user_id", actor.UserID).Msg("add worker via profile service")
+	return s.client.AddWorker(ctx, actor, command)
+}
+
+func (s *Service) ListWorkers(ctx context.Context, actor domain.AuthContext, houseID string) ([]domain.Worker, error) {
+	s.log.Debug().Str("user_id", actor.UserID).Str("house_id", houseID).Msg("list workers via profile service")
+	return s.client.ListWorkers(ctx, actor, houseID)
+}

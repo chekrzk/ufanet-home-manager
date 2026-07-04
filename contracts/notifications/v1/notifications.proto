@@ -9,6 +9,7 @@ import "common/v1/common.proto";
 service NotificationsService {
   rpc RegisterDevice(RegisterDeviceRequest) returns (ufanet.home_manager.common.v1.Empty);
   rpc UnregisterDevice(UnregisterDeviceRequest) returns (ufanet.home_manager.common.v1.Empty);
+  rpc Publish(PublishNotificationRequest) returns (ufanet.home_manager.common.v1.Empty);
 }
 
 message RegisterDeviceRequest {
@@ -22,3 +23,11 @@ message UnregisterDeviceRequest {
   string token = 2;
 }
 
+message PublishNotificationRequest {
+  string user_id = 1;
+  string house_id = 2;
+  string type = 3;
+  string title = 4;
+  string body = 5;
+  string entity_id = 6;
+}

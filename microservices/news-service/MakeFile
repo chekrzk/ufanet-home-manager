@@ -1,0 +1,31 @@
+APP_NAME := news-service
+IMAGE_NAME := ufanet-home-manager/$(APP_NAME)
+IMAGE_TAG ?= local
+CONTAINER_NAME := $(APP_NAME)
+ROOT_DIR := ../..
+ENV_FILE ?= .env
+PORT ?= 50052
+
+.PHONY: build run up down logs test tidy
+
+build:
+	docker build -f Dockerfile -t $(IMAGE_NAME):$(IMAGE_TAG) $(ROOT_DIR)
+
+run:
+	go run ./cmd
+
+up: build
+	docker rm -f $(CONTAINER_NAME) >/dev/null 2>&1 || true
+	docker run -d --name $(CONTAINER_NAME) --env-file $(ENV_FILE) -p $(PORT):$(PORT) $(IMAGE_NAME):$(IMAGE_TAG)
+
+down:
+	docker rm -f $(CONTAINER_NAME)
+
+logs:
+	docker logs -f $(CONTAINER_NAME)
+
+test:
+	go test ./...
+
+tidy:
+	go mod tidy

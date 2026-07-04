@@ -9,6 +9,8 @@ import "common/v1/common.proto";
 service ProfileService {
   rpc Me(MeRequest) returns (ufanet.home_manager.common.v1.User);
   rpc Update(UpdateProfileRequest) returns (ufanet.home_manager.common.v1.User);
+  rpc AddWorker(AddWorkerRequest) returns (ufanet.home_manager.common.v1.Worker);
+  rpc ListWorkers(ListWorkersRequest) returns (ListWorkersResponse);
 }
 
 message MeRequest {
@@ -19,5 +21,23 @@ message UpdateProfileRequest {
   ufanet.home_manager.common.v1.UserContext user = 1;
   string full_name = 2;
   string apartment = 3;
+  string house_id = 4;
 }
 
+message AddWorkerRequest {
+  ufanet.home_manager.common.v1.UserContext actor = 1;
+  string user_id = 2;
+  string full_name = 3;
+  string specialization = 4;
+  string phone = 5;
+  string house_id = 6;
+}
+
+message ListWorkersRequest {
+  ufanet.home_manager.common.v1.UserContext actor = 1;
+  string house_id = 2;
+}
+
+message ListWorkersResponse {
+  repeated ufanet.home_manager.common.v1.Worker items = 1;
+}
