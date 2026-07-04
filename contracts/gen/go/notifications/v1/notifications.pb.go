@@ -134,6 +134,262 @@ func (x *UnregisterDeviceRequest) GetToken() string {
 	return ""
 }
 
+type PublishNotificationRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	HouseId       string                 `protobuf:"bytes,2,opt,name=house_id,json=houseId,proto3" json:"house_id,omitempty"`
+	Type          string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	Title         string                 `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
+	Body          string                 `protobuf:"bytes,5,opt,name=body,proto3" json:"body,omitempty"`
+	EntityId      string                 `protobuf:"bytes,6,opt,name=entity_id,json=entityId,proto3" json:"entity_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PublishNotificationRequest) Reset() {
+	*x = PublishNotificationRequest{}
+	mi := &file_notifications_v1_notifications_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PublishNotificationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PublishNotificationRequest) ProtoMessage() {}
+
+func (x *PublishNotificationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_notifications_v1_notifications_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PublishNotificationRequest.ProtoReflect.Descriptor instead.
+func (*PublishNotificationRequest) Descriptor() ([]byte, []int) {
+	return file_notifications_v1_notifications_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *PublishNotificationRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *PublishNotificationRequest) GetHouseId() string {
+	if x != nil {
+		return x.HouseId
+	}
+	return ""
+}
+
+func (x *PublishNotificationRequest) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *PublishNotificationRequest) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *PublishNotificationRequest) GetBody() string {
+	if x != nil {
+		return x.Body
+	}
+	return ""
+}
+
+func (x *PublishNotificationRequest) GetEntityId() string {
+	if x != nil {
+		return x.EntityId
+	}
+	return ""
+}
+
+type ListNotificationsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	User          *v1.UserContext        `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	Pagination    *v1.Pagination         `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListNotificationsRequest) Reset() {
+	*x = ListNotificationsRequest{}
+	mi := &file_notifications_v1_notifications_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListNotificationsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListNotificationsRequest) ProtoMessage() {}
+
+func (x *ListNotificationsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_notifications_v1_notifications_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListNotificationsRequest.ProtoReflect.Descriptor instead.
+func (*ListNotificationsRequest) Descriptor() ([]byte, []int) {
+	return file_notifications_v1_notifications_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ListNotificationsRequest) GetUser() *v1.UserContext {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+func (x *ListNotificationsRequest) GetPagination() *v1.Pagination {
+	if x != nil {
+		return x.Pagination
+	}
+	return nil
+}
+
+type ListNotificationsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*v1.Notification     `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	Limit         int32                  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
+	Total         int32                  `protobuf:"varint,4,opt,name=total,proto3" json:"total,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListNotificationsResponse) Reset() {
+	*x = ListNotificationsResponse{}
+	mi := &file_notifications_v1_notifications_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListNotificationsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListNotificationsResponse) ProtoMessage() {}
+
+func (x *ListNotificationsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_notifications_v1_notifications_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListNotificationsResponse.ProtoReflect.Descriptor instead.
+func (*ListNotificationsResponse) Descriptor() ([]byte, []int) {
+	return file_notifications_v1_notifications_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ListNotificationsResponse) GetItems() []*v1.Notification {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+func (x *ListNotificationsResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListNotificationsResponse) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *ListNotificationsResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+type MarkReadRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	User           *v1.UserContext        `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	NotificationId string                 `protobuf:"bytes,2,opt,name=notification_id,json=notificationId,proto3" json:"notification_id,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *MarkReadRequest) Reset() {
+	*x = MarkReadRequest{}
+	mi := &file_notifications_v1_notifications_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MarkReadRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MarkReadRequest) ProtoMessage() {}
+
+func (x *MarkReadRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_notifications_v1_notifications_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MarkReadRequest.ProtoReflect.Descriptor instead.
+func (*MarkReadRequest) Descriptor() ([]byte, []int) {
+	return file_notifications_v1_notifications_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *MarkReadRequest) GetUser() *v1.UserContext {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+func (x *MarkReadRequest) GetNotificationId() string {
+	if x != nil {
+		return x.NotificationId
+	}
+	return ""
+}
+
 var File_notifications_v1_notifications_proto protoreflect.FileDescriptor
 
 const file_notifications_v1_notifications_proto_rawDesc = "" +
@@ -145,10 +401,33 @@ const file_notifications_v1_notifications_proto_rawDesc = "" +
 	"\bplatform\x18\x03 \x01(\tR\bplatform\"o\n" +
 	"\x17UnregisterDeviceRequest\x12>\n" +
 	"\x04user\x18\x01 \x01(\v2*.ufanet.home_manager.common.v1.UserContextR\x04user\x12\x14\n" +
-	"\x05token\x18\x02 \x01(\tR\x05token2\x84\x02\n" +
+	"\x05token\x18\x02 \x01(\tR\x05token\"\xab\x01\n" +
+	"\x1aPublishNotificationRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x19\n" +
+	"\bhouse_id\x18\x02 \x01(\tR\ahouseId\x12\x12\n" +
+	"\x04type\x18\x03 \x01(\tR\x04type\x12\x14\n" +
+	"\x05title\x18\x04 \x01(\tR\x05title\x12\x12\n" +
+	"\x04body\x18\x05 \x01(\tR\x04body\x12\x1b\n" +
+	"\tentity_id\x18\x06 \x01(\tR\bentityId\"\xa5\x01\n" +
+	"\x18ListNotificationsRequest\x12>\n" +
+	"\x04user\x18\x01 \x01(\v2*.ufanet.home_manager.common.v1.UserContextR\x04user\x12I\n" +
+	"\n" +
+	"pagination\x18\x02 \x01(\v2).ufanet.home_manager.common.v1.PaginationR\n" +
+	"pagination\"\x9e\x01\n" +
+	"\x19ListNotificationsResponse\x12A\n" +
+	"\x05items\x18\x01 \x03(\v2+.ufanet.home_manager.common.v1.NotificationR\x05items\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x14\n" +
+	"\x05limit\x18\x03 \x01(\x05R\x05limit\x12\x14\n" +
+	"\x05total\x18\x04 \x01(\x05R\x05total\"z\n" +
+	"\x0fMarkReadRequest\x12>\n" +
+	"\x04user\x18\x01 \x01(\v2*.ufanet.home_manager.common.v1.UserContextR\x04user\x12'\n" +
+	"\x0fnotification_id\x18\x02 \x01(\tR\x0enotificationId2\xf7\x04\n" +
 	"\x14NotificationsService\x12s\n" +
 	"\x0eRegisterDevice\x12;.ufanet.home_manager.notifications.v1.RegisterDeviceRequest\x1a$.ufanet.home_manager.common.v1.Empty\x12w\n" +
-	"\x10UnregisterDevice\x12=.ufanet.home_manager.notifications.v1.UnregisterDeviceRequest\x1a$.ufanet.home_manager.common.v1.EmptyBZZXgithub.com/chekrzk/ufanet-home-manager/contracts/gen/go/notifications/v1;notificationsv1b\x06proto3"
+	"\x10UnregisterDevice\x12=.ufanet.home_manager.notifications.v1.UnregisterDeviceRequest\x1a$.ufanet.home_manager.common.v1.Empty\x12q\n" +
+	"\aPublish\x12@.ufanet.home_manager.notifications.v1.PublishNotificationRequest\x1a$.ufanet.home_manager.common.v1.Empty\x12\x94\x01\n" +
+	"\x11ListNotifications\x12>.ufanet.home_manager.notifications.v1.ListNotificationsRequest\x1a?.ufanet.home_manager.notifications.v1.ListNotificationsResponse\x12g\n" +
+	"\bMarkRead\x125.ufanet.home_manager.notifications.v1.MarkReadRequest\x1a$.ufanet.home_manager.common.v1.EmptyBZZXgithub.com/chekrzk/ufanet-home-manager/contracts/gen/go/notifications/v1;notificationsv1b\x06proto3"
 
 var (
 	file_notifications_v1_notifications_proto_rawDescOnce sync.Once
@@ -162,25 +441,41 @@ func file_notifications_v1_notifications_proto_rawDescGZIP() []byte {
 	return file_notifications_v1_notifications_proto_rawDescData
 }
 
-var file_notifications_v1_notifications_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_notifications_v1_notifications_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_notifications_v1_notifications_proto_goTypes = []any{
-	(*RegisterDeviceRequest)(nil),   // 0: ufanet.home_manager.notifications.v1.RegisterDeviceRequest
-	(*UnregisterDeviceRequest)(nil), // 1: ufanet.home_manager.notifications.v1.UnregisterDeviceRequest
-	(*v1.UserContext)(nil),          // 2: ufanet.home_manager.common.v1.UserContext
-	(*v1.Empty)(nil),                // 3: ufanet.home_manager.common.v1.Empty
+	(*RegisterDeviceRequest)(nil),      // 0: ufanet.home_manager.notifications.v1.RegisterDeviceRequest
+	(*UnregisterDeviceRequest)(nil),    // 1: ufanet.home_manager.notifications.v1.UnregisterDeviceRequest
+	(*PublishNotificationRequest)(nil), // 2: ufanet.home_manager.notifications.v1.PublishNotificationRequest
+	(*ListNotificationsRequest)(nil),   // 3: ufanet.home_manager.notifications.v1.ListNotificationsRequest
+	(*ListNotificationsResponse)(nil),  // 4: ufanet.home_manager.notifications.v1.ListNotificationsResponse
+	(*MarkReadRequest)(nil),            // 5: ufanet.home_manager.notifications.v1.MarkReadRequest
+	(*v1.UserContext)(nil),             // 6: ufanet.home_manager.common.v1.UserContext
+	(*v1.Pagination)(nil),              // 7: ufanet.home_manager.common.v1.Pagination
+	(*v1.Notification)(nil),            // 8: ufanet.home_manager.common.v1.Notification
+	(*v1.Empty)(nil),                   // 9: ufanet.home_manager.common.v1.Empty
 }
 var file_notifications_v1_notifications_proto_depIdxs = []int32{
-	2, // 0: ufanet.home_manager.notifications.v1.RegisterDeviceRequest.user:type_name -> ufanet.home_manager.common.v1.UserContext
-	2, // 1: ufanet.home_manager.notifications.v1.UnregisterDeviceRequest.user:type_name -> ufanet.home_manager.common.v1.UserContext
-	0, // 2: ufanet.home_manager.notifications.v1.NotificationsService.RegisterDevice:input_type -> ufanet.home_manager.notifications.v1.RegisterDeviceRequest
-	1, // 3: ufanet.home_manager.notifications.v1.NotificationsService.UnregisterDevice:input_type -> ufanet.home_manager.notifications.v1.UnregisterDeviceRequest
-	3, // 4: ufanet.home_manager.notifications.v1.NotificationsService.RegisterDevice:output_type -> ufanet.home_manager.common.v1.Empty
-	3, // 5: ufanet.home_manager.notifications.v1.NotificationsService.UnregisterDevice:output_type -> ufanet.home_manager.common.v1.Empty
-	4, // [4:6] is the sub-list for method output_type
-	2, // [2:4] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	6,  // 0: ufanet.home_manager.notifications.v1.RegisterDeviceRequest.user:type_name -> ufanet.home_manager.common.v1.UserContext
+	6,  // 1: ufanet.home_manager.notifications.v1.UnregisterDeviceRequest.user:type_name -> ufanet.home_manager.common.v1.UserContext
+	6,  // 2: ufanet.home_manager.notifications.v1.ListNotificationsRequest.user:type_name -> ufanet.home_manager.common.v1.UserContext
+	7,  // 3: ufanet.home_manager.notifications.v1.ListNotificationsRequest.pagination:type_name -> ufanet.home_manager.common.v1.Pagination
+	8,  // 4: ufanet.home_manager.notifications.v1.ListNotificationsResponse.items:type_name -> ufanet.home_manager.common.v1.Notification
+	6,  // 5: ufanet.home_manager.notifications.v1.MarkReadRequest.user:type_name -> ufanet.home_manager.common.v1.UserContext
+	0,  // 6: ufanet.home_manager.notifications.v1.NotificationsService.RegisterDevice:input_type -> ufanet.home_manager.notifications.v1.RegisterDeviceRequest
+	1,  // 7: ufanet.home_manager.notifications.v1.NotificationsService.UnregisterDevice:input_type -> ufanet.home_manager.notifications.v1.UnregisterDeviceRequest
+	2,  // 8: ufanet.home_manager.notifications.v1.NotificationsService.Publish:input_type -> ufanet.home_manager.notifications.v1.PublishNotificationRequest
+	3,  // 9: ufanet.home_manager.notifications.v1.NotificationsService.ListNotifications:input_type -> ufanet.home_manager.notifications.v1.ListNotificationsRequest
+	5,  // 10: ufanet.home_manager.notifications.v1.NotificationsService.MarkRead:input_type -> ufanet.home_manager.notifications.v1.MarkReadRequest
+	9,  // 11: ufanet.home_manager.notifications.v1.NotificationsService.RegisterDevice:output_type -> ufanet.home_manager.common.v1.Empty
+	9,  // 12: ufanet.home_manager.notifications.v1.NotificationsService.UnregisterDevice:output_type -> ufanet.home_manager.common.v1.Empty
+	9,  // 13: ufanet.home_manager.notifications.v1.NotificationsService.Publish:output_type -> ufanet.home_manager.common.v1.Empty
+	4,  // 14: ufanet.home_manager.notifications.v1.NotificationsService.ListNotifications:output_type -> ufanet.home_manager.notifications.v1.ListNotificationsResponse
+	9,  // 15: ufanet.home_manager.notifications.v1.NotificationsService.MarkRead:output_type -> ufanet.home_manager.common.v1.Empty
+	11, // [11:16] is the sub-list for method output_type
+	6,  // [6:11] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_notifications_v1_notifications_proto_init() }
@@ -194,7 +489,7 @@ func file_notifications_v1_notifications_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_notifications_v1_notifications_proto_rawDesc), len(file_notifications_v1_notifications_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

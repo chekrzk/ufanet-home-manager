@@ -11,18 +11,21 @@ import (
 	newsclient "github.com/chekrzk/ufanet-home-manager/api-gateway/infra/clients/news_client"
 	notificationsclient "github.com/chekrzk/ufanet-home-manager/api-gateway/infra/clients/notifications_client"
 	profileclient "github.com/chekrzk/ufanet-home-manager/api-gateway/infra/clients/profile_client"
+	requestsclient "github.com/chekrzk/ufanet-home-manager/api-gateway/infra/clients/requests_client"
 	gwerrors "github.com/chekrzk/ufanet-home-manager/api-gateway/internal/errors"
 	authHandler "github.com/chekrzk/ufanet-home-manager/api-gateway/internal/handlers/auth"
 	healthHandler "github.com/chekrzk/ufanet-home-manager/api-gateway/internal/handlers/health"
 	newsHandler "github.com/chekrzk/ufanet-home-manager/api-gateway/internal/handlers/news"
 	notificationsHandler "github.com/chekrzk/ufanet-home-manager/api-gateway/internal/handlers/notifications"
 	profileHandler "github.com/chekrzk/ufanet-home-manager/api-gateway/internal/handlers/profile"
+	requestsHandler "github.com/chekrzk/ufanet-home-manager/api-gateway/internal/handlers/requests"
 	"github.com/chekrzk/ufanet-home-manager/api-gateway/internal/middlewares"
 	"github.com/chekrzk/ufanet-home-manager/api-gateway/internal/router"
 	authservice "github.com/chekrzk/ufanet-home-manager/api-gateway/internal/services/auth"
 	newsservice "github.com/chekrzk/ufanet-home-manager/api-gateway/internal/services/news"
 	notificationsservice "github.com/chekrzk/ufanet-home-manager/api-gateway/internal/services/notifications"
 	profileservice "github.com/chekrzk/ufanet-home-manager/api-gateway/internal/services/profile"
+	requestsservice "github.com/chekrzk/ufanet-home-manager/api-gateway/internal/services/requests"
 )
 
 type container struct {
@@ -43,12 +46,14 @@ func newContainer(cfg *config.Config, log zerolog.Logger) (*container, error) {
 	newsClient := newsclient.New(conns.news, log)
 	notificationsClient := notificationsclient.New(conns.notifications, log)
 	profileClient := profileclient.New(conns.profile, log)
+	requestsClient := requestsclient.New(conns.requests, log)
 
 	health := healthHandler.NewHandler(cfg.App.Name)
 	auth := authHandler.NewHandler(authservice.New(authClient, log))
 	news := newsHandler.NewHandler(newsservice.New(newsClient, log))
 	notifications := notificationsHandler.NewHandler(notificationsservice.New(notificationsClient, log))
 	profile := profileHandler.NewHandler(profileservice.New(profileClient, log))
+	requests := requestsHandler.NewHandler(requestsservice.New(requestsClient, log))
 
 	return &container{
 		app: fiber.New(fiber.Config{
@@ -61,6 +66,7 @@ func newContainer(cfg *config.Config, log zerolog.Logger) (*container, error) {
 			News:          news,
 			Notifications: notifications,
 			Profile:       profile,
+			Requests:      requests,
 		},
 		log:   log,
 		conns: conns.all(),

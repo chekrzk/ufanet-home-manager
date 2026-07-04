@@ -17,11 +17,10 @@ func (r LoginRequest) Validate() map[string]string {
 }
 
 type RegisterRequest struct {
-	Phone     string `json:"phone"`
-	Password  string `json:"password"`
-	FullName  string `json:"full_name"`
-	HouseID   string `json:"house_id"`
-	Apartment string `json:"apartment"`
+	Phone    string `json:"phone"`
+	Password string `json:"password"`
+	FullName string `json:"full_name"`
+	Role     string `json:"role"`
 }
 
 func (r RegisterRequest) Validate() map[string]string {

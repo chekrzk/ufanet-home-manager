@@ -14,6 +14,7 @@ type Config struct {
 	Timeout   TimeoutConfig
 	JWT       JWTConfig
 	RateLimit RateLimitConfig
+	CORS      CORSConfig
 	Service   ServiceConfig
 }
 
@@ -48,6 +49,12 @@ type JWTConfig struct {
 type RateLimitConfig struct {
 	Max        int           `envconfig:"RATE_LIMIT_MAX" default:"100"`
 	Expiration time.Duration `envconfig:"RATE_LIMIT_EXPIRATION" default:"1m"`
+}
+
+type CORSConfig struct {
+	AllowedOrigins string `envconfig:"CORS_ALLOWED_ORIGINS" default:"http://localhost:5173,http://127.0.0.1:5173"`
+	AllowedMethods string `envconfig:"CORS_ALLOWED_METHODS" default:"GET,POST,PUT,PATCH,DELETE,OPTIONS"`
+	AllowedHeaders string `envconfig:"CORS_ALLOWED_HEADERS" default:"Origin,Content-Type,Accept,Authorization"`
 }
 
 type ServiceConfig struct {

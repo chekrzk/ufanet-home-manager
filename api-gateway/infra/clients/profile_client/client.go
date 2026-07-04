@@ -33,6 +33,7 @@ func (c *Client) Update(ctx context.Context, actor domain.AuthContext, command d
 	resp, err := c.client.Update(ctx, &profilev1.UpdateProfileRequest{
 		User:      userContext(actor),
 		FullName:  command.FullName,
+		HouseId:   command.HouseID,
 		Apartment: command.Apartment,
 	})
 	if err != nil {
@@ -41,8 +42,88 @@ func (c *Client) Update(ctx context.Context, actor domain.AuthContext, command d
 	return userFromProto(resp), nil
 }
 
+func (c *Client) AddWorker(ctx context.Context, actor domain.AuthContext, command domain.AddWorker) (domain.Worker, error) {
+	c.log.Debug().Str("user_id", actor.UserID).Msg("call profile grpc add worker")
+	resp, err := c.client.AddWorker(ctx, &profilev1.AddWorkerRequest{
+		Actor:          userContext(actor),
+		UserId:         command.UserID,
+		FullName:       command.FullName,
+		Specialization: command.Specialization,
+		Phone:          command.Phone,
+		HouseId:        command.HouseID,
+	})
+	if err != nil {
+		return domain.Worker{}, err
+	}
+	return workerFromProto(resp), nil
+}
+
+func (c *Client) ListWorkers(ctx context.Context, actor domain.AuthContext, houseID string) ([]domain.Worker, error) {
+	c.log.Debug().Str("user_id", actor.UserID).Str("house_id", houseID).Msg("call profile grpc list workers")
+	resp, err := c.client.ListWorkers(ctx, &profilev1.ListWorkersRequest{
+		Actor:   userContext(actor),
+		HouseId: houseID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	items := make([]domain.Worker, 0, len(resp.GetItems()))
+	for _, item := range resp.GetItems() {
+		items = append(items, workerFromProto(item))
+	}
+	return items, nil
+}
+
+func (c *Client) SetWorkerAvailability(ctx context.Context, actor domain.AuthContext, command domain.SetWorkerAvailability) (domain.WorkerAvailability, error) {
+	c.log.Debug().Str("user_id", actor.UserID).Str("house_id", command.HouseID).Msg("call profile grpc set worker availability")
+	resp, err := c.client.SetWorkerAvailability(ctx, &profilev1.SetWorkerAvailabilityRequest{
+		Worker:         userContext(actor),
+		Specialization: command.Specialization,
+		HouseId:        command.HouseID,
+		AvailableDate:  command.AvailableDate,
+		AvailableTime:  command.AvailableTime,
+	})
+	if err != nil {
+		return domain.WorkerAvailability{}, err
+	}
+	return availabilityFromProto(resp), nil
+}
+
+func (c *Client) ListWorkerAvailability(ctx context.Context, actor domain.AuthContext, filter domain.WorkerAvailabilityFilter) ([]domain.WorkerAvailability, error) {
+	c.log.Debug().Str("user_id", actor.UserID).Str("house_id", filter.HouseID).Msg("call profile grpc list worker availability")
+	resp, err := c.client.ListWorkerAvailability(ctx, &profilev1.ListWorkerAvailabilityRequest{
+		Actor:          userContext(actor),
+		HouseId:        filter.HouseID,
+		Specialization: filter.Specialization,
+		AvailableDate:  filter.AvailableDate,
+	})
+	if err != nil {
+		return nil, err
+	}
+	items := make([]domain.WorkerAvailability, 0, len(resp.GetItems()))
+	for _, item := range resp.GetItems() {
+		items = append(items, availabilityFromProto(item))
+	}
+	return items, nil
+}
+
 func userContext(actor domain.AuthContext) *commonv1.UserContext {
 	return &commonv1.UserContext{UserId: actor.UserID, Role: actor.Role}
+}
+
+func availabilityFromProto(item *commonv1.WorkerAvailability) domain.WorkerAvailability {
+	if item == nil {
+		return domain.WorkerAvailability{}
+	}
+	return domain.WorkerAvailability{
+		ID:             item.GetId(),
+		WorkerID:       item.GetWorkerId(),
+		UserID:         item.GetUserId(),
+		Specialization: item.GetSpecialization(),
+		HouseID:        item.GetHouseId(),
+		AvailableDate:  item.GetAvailableDate(),
+		AvailableTime:  item.GetAvailableTime(),
+	}
 }
 
 func userFromProto(user *commonv1.User) domain.User {
@@ -56,5 +137,19 @@ func userFromProto(user *commonv1.User) domain.User {
 		Role:      user.GetRole(),
 		HouseID:   user.GetHouseId(),
 		Apartment: user.GetApartment(),
+	}
+}
+
+func workerFromProto(worker *commonv1.Worker) domain.Worker {
+	if worker == nil {
+		return domain.Worker{}
+	}
+	return domain.Worker{
+		ID:             worker.GetId(),
+		UserID:         worker.GetUserId(),
+		FullName:       worker.GetFullName(),
+		Specialization: worker.GetSpecialization(),
+		Phone:          worker.GetPhone(),
+		HouseID:        worker.GetHouseId(),
 	}
 }

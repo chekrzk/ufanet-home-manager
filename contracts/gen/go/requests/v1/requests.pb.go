@@ -23,12 +23,17 @@ const (
 )
 
 type CreateRequestRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	User          *v1.UserContext        `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
-	Category      string                 `protobuf:"bytes,2,opt,name=category,proto3" json:"category,omitempty"`
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	User             *v1.UserContext        `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	Category         string                 `protobuf:"bytes,2,opt,name=category,proto3" json:"category,omitempty"`
+	Description      string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	PreferredDate    string                 `protobuf:"bytes,4,opt,name=preferred_date,json=preferredDate,proto3" json:"preferred_date,omitempty"`
+	AssignedWorkerId string                 `protobuf:"bytes,5,opt,name=assigned_worker_id,json=assignedWorkerId,proto3" json:"assigned_worker_id,omitempty"`
+	Address          string                 `protobuf:"bytes,6,opt,name=address,proto3" json:"address,omitempty"`
+	Apartment        string                 `protobuf:"bytes,7,opt,name=apartment,proto3" json:"apartment,omitempty"`
+	Phone            string                 `protobuf:"bytes,8,opt,name=phone,proto3" json:"phone,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *CreateRequestRequest) Reset() {
@@ -78,6 +83,41 @@ func (x *CreateRequestRequest) GetCategory() string {
 func (x *CreateRequestRequest) GetDescription() string {
 	if x != nil {
 		return x.Description
+	}
+	return ""
+}
+
+func (x *CreateRequestRequest) GetPreferredDate() string {
+	if x != nil {
+		return x.PreferredDate
+	}
+	return ""
+}
+
+func (x *CreateRequestRequest) GetAssignedWorkerId() string {
+	if x != nil {
+		return x.AssignedWorkerId
+	}
+	return ""
+}
+
+func (x *CreateRequestRequest) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+func (x *CreateRequestRequest) GetApartment() string {
+	if x != nil {
+		return x.Apartment
+	}
+	return ""
+}
+
+func (x *CreateRequestRequest) GetPhone() string {
+	if x != nil {
+		return x.Phone
 	}
 	return ""
 }
@@ -259,6 +299,7 @@ type UpdateRequestStatusRequest struct {
 	Actor         *v1.UserContext        `protobuf:"bytes,1,opt,name=actor,proto3" json:"actor,omitempty"`
 	RequestId     string                 `protobuf:"bytes,2,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
+	AssignedTo    string                 `protobuf:"bytes,4,opt,name=assigned_to,json=assignedTo,proto3" json:"assigned_to,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -310,6 +351,13 @@ func (x *UpdateRequestStatusRequest) GetRequestId() string {
 func (x *UpdateRequestStatusRequest) GetStatus() string {
 	if x != nil {
 		return x.Status
+	}
+	return ""
+}
+
+func (x *UpdateRequestStatusRequest) GetAssignedTo() string {
+	if x != nil {
+		return x.AssignedTo
 	}
 	return ""
 }
@@ -378,11 +426,16 @@ var File_requests_v1_requests_proto protoreflect.FileDescriptor
 
 const file_requests_v1_requests_proto_rawDesc = "" +
 	"\n" +
-	"\x1arequests/v1/requests.proto\x12\x1fufanet.home_manager.requests.v1\x1a\x16common/v1/common.proto\"\x94\x01\n" +
+	"\x1arequests/v1/requests.proto\x12\x1fufanet.home_manager.requests.v1\x1a\x16common/v1/common.proto\"\xb7\x02\n" +
 	"\x14CreateRequestRequest\x12>\n" +
 	"\x04user\x18\x01 \x01(\v2*.ufanet.home_manager.common.v1.UserContextR\x04user\x12\x1a\n" +
 	"\bcategory\x18\x02 \x01(\tR\bcategory\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\"\xa0\x01\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12%\n" +
+	"\x0epreferred_date\x18\x04 \x01(\tR\rpreferredDate\x12,\n" +
+	"\x12assigned_worker_id\x18\x05 \x01(\tR\x10assignedWorkerId\x12\x18\n" +
+	"\aaddress\x18\x06 \x01(\tR\aaddress\x12\x1c\n" +
+	"\tapartment\x18\a \x01(\tR\tapartment\x12\x14\n" +
+	"\x05phone\x18\b \x01(\tR\x05phone\"\xa0\x01\n" +
 	"\x13ListRequestsRequest\x12>\n" +
 	"\x04user\x18\x01 \x01(\v2*.ufanet.home_manager.common.v1.UserContextR\x04user\x12I\n" +
 	"\n" +
@@ -396,12 +449,14 @@ const file_requests_v1_requests_proto_rawDesc = "" +
 	"\x11GetRequestRequest\x12>\n" +
 	"\x04user\x18\x01 \x01(\v2*.ufanet.home_manager.common.v1.UserContextR\x04user\x12\x1d\n" +
 	"\n" +
-	"request_id\x18\x02 \x01(\tR\trequestId\"\x95\x01\n" +
+	"request_id\x18\x02 \x01(\tR\trequestId\"\xb6\x01\n" +
 	"\x1aUpdateRequestStatusRequest\x12@\n" +
 	"\x05actor\x18\x01 \x01(\v2*.ufanet.home_manager.common.v1.UserContextR\x05actor\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x02 \x01(\tR\trequestId\x12\x16\n" +
-	"\x06status\x18\x03 \x01(\tR\x06status\"\x8d\x01\n" +
+	"\x06status\x18\x03 \x01(\tR\x06status\x12\x1f\n" +
+	"\vassigned_to\x18\x04 \x01(\tR\n" +
+	"assignedTo\"\x8d\x01\n" +
 	"\x18AddRequestCommentRequest\x12>\n" +
 	"\x04user\x18\x01 \x01(\v2*.ufanet.home_manager.common.v1.UserContextR\x04user\x12\x1d\n" +
 	"\n" +

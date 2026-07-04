@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/rs/zerolog"
@@ -44,6 +45,14 @@ func (m *Middlewares) Logger() fiber.Handler {
 
 		return err
 	}
+}
+
+func (m *Middlewares) CORS() fiber.Handler {
+	return cors.New(cors.Config{
+		AllowOrigins: m.cfg.CORS.AllowedOrigins,
+		AllowMethods: m.cfg.CORS.AllowedMethods,
+		AllowHeaders: m.cfg.CORS.AllowedHeaders,
+	})
 }
 
 func (m *Middlewares) RateLimit() fiber.Handler {

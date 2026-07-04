@@ -18,6 +18,11 @@ message CreateRequestRequest {
   ufanet.home_manager.common.v1.UserContext user = 1;
   string category = 2;
   string description = 3;
+  string preferred_date = 4;
+  string assigned_worker_id = 5;
+  string address = 6;
+  string apartment = 7;
+  string phone = 8;
 }
 
 message ListRequestsRequest {
@@ -41,6 +46,7 @@ message UpdateRequestStatusRequest {
   ufanet.home_manager.common.v1.UserContext actor = 1;
   string request_id = 2;
   string status = 3;
+  string assigned_to = 4;
 }
 
 message AddRequestCommentRequest {
@@ -48,4 +54,3 @@ message AddRequestCommentRequest {
   string request_id = 2;
   string text = 3;
 }
-

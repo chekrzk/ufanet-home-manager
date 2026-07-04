@@ -24,9 +24,14 @@ func New(conn *grpc.ClientConn, log zerolog.Logger) *Client {
 func (c *Client) Create(ctx context.Context, actor domain.AuthContext, command domain.CreateRequest) (domain.Request, error) {
 	c.log.Debug().Str("user_id", actor.UserID).Msg("call requests grpc create")
 	resp, err := c.client.CreateRequest(ctx, &requestsv1.CreateRequestRequest{
-		User:        userContext(actor),
-		Category:    command.Category,
-		Description: command.Description,
+		User:             userContext(actor),
+		Category:         command.Category,
+		Description:      command.Description,
+		PreferredDate:    command.PreferredDate,
+		AssignedWorkerId: command.AssignedWorkerID,
+		Address:          command.Address,
+		Apartment:        command.Apartment,
+		Phone:            command.Phone,
 	})
 	if err != nil {
 		return domain.Request{}, err
@@ -72,9 +77,10 @@ func (c *Client) Get(ctx context.Context, actor domain.AuthContext, requestID st
 func (c *Client) UpdateStatus(ctx context.Context, actor domain.AuthContext, requestID string, command domain.UpdateRequestStatus) (domain.Request, error) {
 	c.log.Debug().Str("user_id", actor.UserID).Str("request_id", requestID).Msg("call requests grpc update status")
 	resp, err := c.client.UpdateRequestStatus(ctx, &requestsv1.UpdateRequestStatusRequest{
-		Actor:     userContext(actor),
-		RequestId: requestID,
-		Status:    command.Status,
+		Actor:      userContext(actor),
+		RequestId:  requestID,
+		Status:     command.Status,
+		AssignedTo: command.AssignedTo,
 	})
 	if err != nil {
 		return domain.Request{}, err
@@ -106,13 +112,21 @@ func requestFromProto(request *commonv1.MaintenanceRequest) domain.Request {
 		return domain.Request{}
 	}
 	return domain.Request{
-		ID:          request.GetId(),
-		UserID:      request.GetUserId(),
-		Category:    request.GetCategory(),
-		Description: request.GetDescription(),
-		Status:      request.GetStatus(),
-		CreatedAt:   timeFromProto(request.GetCreatedAt()),
-		UpdatedAt:   timeFromProto(request.GetUpdatedAt()),
+		ID:            request.GetId(),
+		UserID:        request.GetUserId(),
+		Category:      request.GetCategory(),
+		Description:   request.GetDescription(),
+		Status:        request.GetStatus(),
+		AssignedTo:    request.GetAssignedTo(),
+		PreferredDate: request.GetPreferredDate(),
+		Address:       request.GetAddress(),
+		Apartment:     request.GetApartment(),
+		Phone:         request.GetPhone(),
+		AcceptedAt:    timeFromProto(request.GetAcceptedAt()),
+		DeclinedAt:    timeFromProto(request.GetDeclinedAt()),
+		CompletedAt:   timeFromProto(request.GetCompletedAt()),
+		CreatedAt:     timeFromProto(request.GetCreatedAt()),
+		UpdatedAt:     timeFromProto(request.GetUpdatedAt()),
 	}
 }
 

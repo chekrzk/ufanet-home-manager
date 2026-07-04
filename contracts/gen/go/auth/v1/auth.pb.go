@@ -81,6 +81,7 @@ type RegisterRequest struct {
 	FullName      string                 `protobuf:"bytes,3,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
 	HouseId       string                 `protobuf:"bytes,4,opt,name=house_id,json=houseId,proto3" json:"house_id,omitempty"`
 	Apartment     string                 `protobuf:"bytes,5,opt,name=apartment,proto3" json:"apartment,omitempty"`
+	Role          string                 `protobuf:"bytes,6,opt,name=role,proto3" json:"role,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -146,6 +147,13 @@ func (x *RegisterRequest) GetHouseId() string {
 func (x *RegisterRequest) GetApartment() string {
 	if x != nil {
 		return x.Apartment
+	}
+	return ""
+}
+
+func (x *RegisterRequest) GetRole() string {
+	if x != nil {
+		return x.Role
 	}
 	return ""
 }
@@ -261,13 +269,14 @@ const file_auth_v1_auth_proto_rawDesc = "" +
 	"\x12auth/v1/auth.proto\x12\x1bufanet.home_manager.auth.v1\x1a\x16common/v1/common.proto\"@\n" +
 	"\fLoginRequest\x12\x14\n" +
 	"\x05phone\x18\x01 \x01(\tR\x05phone\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"\x99\x01\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"\xad\x01\n" +
 	"\x0fRegisterRequest\x12\x14\n" +
 	"\x05phone\x18\x01 \x01(\tR\x05phone\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x1b\n" +
 	"\tfull_name\x18\x03 \x01(\tR\bfullName\x12\x19\n" +
 	"\bhouse_id\x18\x04 \x01(\tR\ahouseId\x12\x1c\n" +
-	"\tapartment\x18\x05 \x01(\tR\tapartment\"5\n" +
+	"\tapartment\x18\x05 \x01(\tR\tapartment\x12\x12\n" +
+	"\x04role\x18\x06 \x01(\tR\x04role\"5\n" +
 	"\x0eRefreshRequest\x12#\n" +
 	"\rrefresh_token\x18\x01 \x01(\tR\frefreshToken\"s\n" +
 	"\n" +

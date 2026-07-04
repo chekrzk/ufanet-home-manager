@@ -1,0 +1,185 @@
+﻿services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: ufanet-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: ufanet-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: microservices/auth-service/Dockerfile
+    container_name: auth-service
+    environment:
+      APP_NAME: auth-service
+      APP_ENV: local
+      GRPC_HOST: 0.0.0.0
+      GRPC_PORT: 50051
+      DATABASE_DSN: host=postgres user=postgres password=postgres dbname=ufanet_auth port=5432 sslmode=disable TimeZone=Asia/Yekaterinburg
+      JWT_SECRET: dev-secret-change-me
+      JWT_ACCESS_TTL: 15m
+      JWT_REFRESH_TTL: 168h
+      JWT_ISSUER: auth-service
+      LOG_LEVEL: debug
+      LOG_PRETTY: "true"
+    ports:
+      - "50051:50051"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: microservices/notification-service/Dockerfile
+    container_name: notification-service
+    environment:
+      APP_NAME: notification-service
+      APP_ENV: local
+      GRPC_HOST: 0.0.0.0
+      GRPC_PORT: 50054
+      DATABASE_DSN: host=postgres user=postgres password=postgres dbname=ufanet_notifications port=5432 sslmode=disable TimeZone=Asia/Yekaterinburg
+      REDIS_ADDR: redis:6379
+      REDIS_NOTIFICATIONS_STREAM: notifications
+      LOG_LEVEL: debug
+      LOG_PRETTY: "true"
+    ports:
+      - "50054:50054"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  profile-service:
+    build:
+      context: .
+      dockerfile: microservices/profile-service/Dockerfile
+    container_name: profile-service
+    environment:
+      APP_NAME: profile-service
+      APP_ENV: local
+      GRPC_HOST: 0.0.0.0
+      GRPC_PORT: 50055
+      DATABASE_DSN: host=postgres user=postgres password=postgres dbname=ufanet_profile port=5432 sslmode=disable TimeZone=Asia/Yekaterinburg
+      LOG_LEVEL: debug
+      LOG_PRETTY: "true"
+    ports:
+      - "50055:50055"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  requests-service:
+    build:
+      context: .
+      dockerfile: microservices/requests-service/Dockerfile
+    container_name: requests-service
+    environment:
+      APP_NAME: requests-service
+      APP_ENV: local
+      GRPC_HOST: 0.0.0.0
+      GRPC_PORT: 50053
+      DATABASE_DSN: host=postgres user=postgres password=postgres dbname=ufanet_requests port=5432 sslmode=disable TimeZone=Asia/Yekaterinburg
+      NOTIFICATIONS_SERVICE_ADDR: notification-service:50054
+      REQUEST_TIMEOUT: 5s
+      LOG_LEVEL: debug
+      LOG_PRETTY: "true"
+    ports:
+      - "50053:50053"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      notification-service:
+        condition: service_started
+
+  news-service:
+    build:
+      context: .
+      dockerfile: microservices/news-service/Dockerfile
+    container_name: news-service
+    environment:
+      APP_NAME: news-service
+      APP_ENV: local
+      GRPC_HOST: 0.0.0.0
+      GRPC_PORT: 50052
+      DATABASE_DSN: host=postgres user=postgres password=postgres dbname=ufanet_news port=5432 sslmode=disable TimeZone=Asia/Yekaterinburg
+      NOTIFICATIONS_SERVICE_ADDR: notification-service:50054
+      REQUEST_TIMEOUT: 5s
+      LOG_LEVEL: debug
+      LOG_PRETTY: "true"
+    ports:
+      - "50052:50052"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      notification-service:
+        condition: service_started
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: api-gateway
+    environment:
+      APP_NAME: api-gateway
+      APP_ENV: local
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: 8086
+      JWT_SECRET: dev-secret-change-me
+      JWT_ACCESS_TTL: 15m
+      REQUEST_TIMEOUT: 5s
+      RATE_LIMIT_MAX: 100
+      RATE_LIMIT_EXPIRATION: 1m
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+      CORS_ALLOWED_METHODS: GET,POST,PUT,PATCH,DELETE,OPTIONS
+      CORS_ALLOWED_HEADERS: Origin,Content-Type,Accept,Authorization
+      AUTH_SERVICE_ADDR: auth-service:50051
+      NEWS_SERVICE_ADDR: news-service:50052
+      REQUESTS_SERVICE_ADDR: requests-service:50053
+      NOTIFICATIONS_SERVICE_ADDR: notification-service:50054
+      PROFILE_SERVICE_ADDR: profile-service:50055
+      LOG_LEVEL: debug
+      LOG_PRETTY: "true"
+    ports:
+      - "8086:8086"
+    depends_on:
+      auth-service:
+        condition: service_started
+      news-service:
+        condition: service_started
+      requests-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+      profile-service:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  redis_data:

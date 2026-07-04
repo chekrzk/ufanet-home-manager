@@ -1,12 +1,18 @@
 package domain
 
 type CreateRequest struct {
-	Category    string
-	Description string
+	Category         string
+	Description      string
+	PreferredDate    string
+	AssignedWorkerID string
+	Address          string
+	Apartment        string
+	Phone            string
 }
 
 type UpdateRequestStatus struct {
-	Status string
+	Status     string
+	AssignedTo string
 }
 
 type AddRequestComment struct {
