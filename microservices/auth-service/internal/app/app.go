@@ -18,6 +18,8 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Run собирает auth-service как gRPC-приложение: ресурсы создаются один раз,
+// миграции выполняются до приема трафика, а shutdown закрывает сервер корректно.
 func Run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()

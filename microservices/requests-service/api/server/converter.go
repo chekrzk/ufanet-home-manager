@@ -9,6 +9,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+// userContextFromProto переносит actor context в domain без proto-зависимости.
 func userContextFromProto(user *commonv1.UserContext) models.UserContext {
 	if user == nil {
 		return models.UserContext{}
@@ -16,6 +17,7 @@ func userContextFromProto(user *commonv1.UserContext) models.UserContext {
 	return models.UserContext{UserID: user.GetUserId(), Role: user.GetRole()}
 }
 
+// createRequestCommandFromProto собирает команду создания заявки на transport-границе.
 func createRequestCommandFromProto(req *requestsv1.CreateRequestRequest) models.CreateRequestCommand {
 	return models.CreateRequestCommand{
 		User:             userContextFromProto(req.GetUser()),
@@ -29,6 +31,7 @@ func createRequestCommandFromProto(req *requestsv1.CreateRequestRequest) models.
 	}
 }
 
+// listRequestsFilterFromProto переносит actor и pagination в сценарий списка заявок.
 func listRequestsFilterFromProto(req *requestsv1.ListRequestsRequest) models.ListRequestsFilter {
 	return models.ListRequestsFilter{
 		Actor: userContextFromProto(req.GetUser()),
@@ -39,10 +42,12 @@ func listRequestsFilterFromProto(req *requestsv1.ListRequestsRequest) models.Lis
 	}
 }
 
+// getRequestCommandFromProto связывает request id с actor для проверки доступа.
 func getRequestCommandFromProto(req *requestsv1.GetRequestRequest) models.GetRequestCommand {
 	return models.GetRequestCommand{Actor: userContextFromProto(req.GetUser()), RequestID: req.GetRequestId()}
 }
 
+// updateRequestStatusCommandFromProto переводит изменение статуса в domain command.
 func updateRequestStatusCommandFromProto(req *requestsv1.UpdateRequestStatusRequest) models.UpdateRequestStatusCommand {
 	return models.UpdateRequestStatusCommand{
 		Actor:      userContextFromProto(req.GetActor()),
@@ -52,6 +57,7 @@ func updateRequestStatusCommandFromProto(req *requestsv1.UpdateRequestStatusRequ
 	}
 }
 
+// addRequestCommentCommandFromProto строит команду комментария с actor context.
 func addRequestCommentCommandFromProto(req *requestsv1.AddRequestCommentRequest) models.AddRequestCommentCommand {
 	return models.AddRequestCommentCommand{
 		Actor:     userContextFromProto(req.GetUser()),
@@ -60,6 +66,7 @@ func addRequestCommentCommandFromProto(req *requestsv1.AddRequestCommentRequest)
 	}
 }
 
+// requestToProto скрывает storage-модель заявки за общим gRPC-контрактом.
 func requestToProto(request models.MaintenanceRequest) *commonv1.MaintenanceRequest {
 	assignedTo := ""
 	if request.AssignedTo != nil {
@@ -84,6 +91,7 @@ func requestToProto(request models.MaintenanceRequest) *commonv1.MaintenanceRequ
 	}
 }
 
+// timeToProto сохраняет nullable timestamps при переходе из domain в proto.
 func timeToProto(value *time.Time) *timestamppb.Timestamp {
 	if value == nil {
 		return nil

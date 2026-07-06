@@ -7,6 +7,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+// userContextFromProto переносит trusted actor context из gateway в domain.
 func userContextFromProto(user *commonv1.UserContext) models.UserContext {
 	if user == nil {
 		return models.UserContext{}
@@ -14,6 +15,7 @@ func userContextFromProto(user *commonv1.UserContext) models.UserContext {
 	return models.UserContext{UserID: user.GetUserId(), Role: user.GetRole()}
 }
 
+// registerDeviceCommandFromProto изолирует proto device payload от service layer.
 func registerDeviceCommandFromProto(req *notificationsv1.RegisterDeviceRequest) models.RegisterDeviceCommand {
 	return models.RegisterDeviceCommand{
 		User:     userContextFromProto(req.GetUser()),
@@ -22,6 +24,7 @@ func registerDeviceCommandFromProto(req *notificationsv1.RegisterDeviceRequest) 
 	}
 }
 
+// unregisterDeviceCommandFromProto строит команду отвязки устройства из контракта.
 func unregisterDeviceCommandFromProto(req *notificationsv1.UnregisterDeviceRequest) models.UnregisterDeviceCommand {
 	return models.UnregisterDeviceCommand{
 		User:  userContextFromProto(req.GetUser()),
@@ -29,6 +32,7 @@ func unregisterDeviceCommandFromProto(req *notificationsv1.UnregisterDeviceReque
 	}
 }
 
+// publishNotificationCommandFromProto делает внутреннюю публикацию transport-agnostic.
 func publishNotificationCommandFromProto(req *notificationsv1.PublishNotificationRequest) models.PublishNotificationCommand {
 	return models.PublishNotificationCommand{
 		UserID:   req.GetUserId(),
@@ -40,6 +44,7 @@ func publishNotificationCommandFromProto(req *notificationsv1.PublishNotificatio
 	}
 }
 
+// listNotificationsCommandFromProto переносит actor и pagination в domain command.
 func listNotificationsCommandFromProto(req *notificationsv1.ListNotificationsRequest) models.ListNotificationsCommand {
 	return models.ListNotificationsCommand{
 		User: userContextFromProto(req.GetUser()),
@@ -50,6 +55,7 @@ func listNotificationsCommandFromProto(req *notificationsv1.ListNotificationsReq
 	}
 }
 
+// notificationToProto скрывает storage-модель уведомления за общим контрактом.
 func notificationToProto(notification models.Notification) *commonv1.Notification {
 	userID := ""
 	if notification.UserID != nil {

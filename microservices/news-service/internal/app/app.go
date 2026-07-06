@@ -17,6 +17,8 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Run собирает news-service вокруг gRPC-сервера, чтобы миграции, зависимости
+// и исходящий notifications client стартовали до обработки запросов.
 func Run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()

@@ -16,10 +16,14 @@ type Server struct {
 	service NewsService
 }
 
+// New связывает gRPC endpoint с интерфейсом сценариев новостей, чтобы transport
+// не зависел от repository и notification client.
 func New(service NewsService) *Server {
 	return &Server{service: service}
 }
 
+// ListNews конвертирует proto-фильтр в доменную модель, чтобы service layer
+// отвечал за правила ленты, а не за формат контракта.
 func (s *Server) ListNews(ctx context.Context, req *newsv1.ListNewsRequest) (*newsv1.ListNewsResponse, error) {
 	page, err := s.service.List(ctx, newsFilterFromProto(req))
 	if err != nil {
@@ -32,6 +36,8 @@ func (s *Server) ListNews(ctx context.Context, req *newsv1.ListNewsRequest) (*ne
 	return &newsv1.ListNewsResponse{Items: items, Page: int32(page.Page), Limit: int32(page.Limit), Total: int32(page.Total)}, nil
 }
 
+// CreateNews оставляет публикацию и side effects сервисному слою, а server
+// только связывает gRPC request/response с доменной командой.
 func (s *Server) CreateNews(ctx context.Context, req *newsv1.CreateNewsRequest) (*commonv1.News, error) {
 	item, err := s.service.Create(ctx, createNewsCommandFromProto(req))
 	if err != nil {
@@ -40,6 +46,7 @@ func (s *Server) CreateNews(ctx context.Context, req *newsv1.CreateNewsRequest) 
 	return newsToProto(item), nil
 }
 
+// grpcError сохраняет единый контракт ошибок между news-service и gateway.
 func grpcError(err error) error {
 	switch {
 	case stderrors.Is(err, apperrors.ErrInvalidArgument):

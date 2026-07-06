@@ -7,6 +7,7 @@ import (
 	commonv1 "github.com/chekrzk/ufanet-home-manager/contracts/gen/go/common/v1"
 )
 
+// loginCommandFromProto держит proto-модель на границе transport layer.
 func loginCommandFromProto(req *authv1.LoginRequest) models.LoginCommand {
 	return models.LoginCommand{
 		Phone:    req.GetPhone(),
@@ -14,6 +15,7 @@ func loginCommandFromProto(req *authv1.LoginRequest) models.LoginCommand {
 	}
 }
 
+// registerCommandFromProto переводит внешний контракт в команду auth domain.
 func registerCommandFromProto(req *authv1.RegisterRequest) models.RegisterCommand {
 	return models.RegisterCommand{
 		Phone:    req.GetPhone(),
@@ -22,6 +24,7 @@ func registerCommandFromProto(req *authv1.RegisterRequest) models.RegisterComman
 	}
 }
 
+// tokensToProto возвращает JWT pair в формате, стабильном для gateway.
 func tokensToProto(tokens jwtmanager.Pair) *authv1.AuthTokens {
 	return &authv1.AuthTokens{
 		AccessToken:  tokens.AccessToken,
@@ -30,6 +33,7 @@ func tokensToProto(tokens jwtmanager.Pair) *authv1.AuthTokens {
 	}
 }
 
+// userToProto не дает domain User протекать за пределы auth-service.
 func userToProto(user models.User) *commonv1.User {
 	return &commonv1.User{
 		Id:    user.ID,

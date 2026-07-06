@@ -16,10 +16,12 @@ type Server struct {
 	service NotificationService
 }
 
+// New подключает gRPC transport к notification scenarios без знания DB или Redis.
 func New(service NotificationService) *Server {
 	return &Server{service: service}
 }
 
+// RegisterDevice переводит transport request в команду привязки устройства.
 func (s *Server) RegisterDevice(ctx context.Context, req *notificationsv1.RegisterDeviceRequest) (*commonv1.Empty, error) {
 	err := s.service.RegisterDevice(ctx, registerDeviceCommandFromProto(req))
 	if err != nil {
@@ -28,6 +30,7 @@ func (s *Server) RegisterDevice(ctx context.Context, req *notificationsv1.Regist
 	return &commonv1.Empty{}, nil
 }
 
+// UnregisterDevice держит отвязку устройства в service layer, а не в gRPC handler.
 func (s *Server) UnregisterDevice(ctx context.Context, req *notificationsv1.UnregisterDeviceRequest) (*commonv1.Empty, error) {
 	err := s.service.UnregisterDevice(ctx, unregisterDeviceCommandFromProto(req))
 	if err != nil {
@@ -36,6 +39,8 @@ func (s *Server) UnregisterDevice(ctx context.Context, req *notificationsv1.Unre
 	return &commonv1.Empty{}, nil
 }
 
+// Publish нужен для внутренних сервисов, чтобы они создавали уведомления через
+// один контракт, не зная о Redis Stream и таблицах notification-service.
 func (s *Server) Publish(ctx context.Context, req *notificationsv1.PublishNotificationRequest) (*commonv1.Empty, error) {
 	err := s.service.Publish(ctx, publishNotificationCommandFromProto(req))
 	if err != nil {
@@ -44,6 +49,7 @@ func (s *Server) Publish(ctx context.Context, req *notificationsv1.PublishNotifi
 	return &commonv1.Empty{}, nil
 }
 
+// ListNotifications возвращает историю уведомлений через service rules владельца.
 func (s *Server) ListNotifications(ctx context.Context, req *notificationsv1.ListNotificationsRequest) (*notificationsv1.ListNotificationsResponse, error) {
 	page, err := s.service.List(ctx, listNotificationsCommandFromProto(req))
 	if err != nil {
@@ -61,6 +67,7 @@ func (s *Server) ListNotifications(ctx context.Context, req *notificationsv1.Lis
 	}, nil
 }
 
+// MarkRead оставляет проверку владельца уведомления в service layer.
 func (s *Server) MarkRead(ctx context.Context, req *notificationsv1.MarkReadRequest) (*commonv1.Empty, error) {
 	if err := s.service.MarkRead(ctx, userContextFromProto(req.GetUser()), req.GetNotificationId()); err != nil {
 		return nil, grpcError(err)
@@ -68,6 +75,7 @@ func (s *Server) MarkRead(ctx context.Context, req *notificationsv1.MarkReadRequ
 	return &commonv1.Empty{}, nil
 }
 
+// grpcError переводит доменные ошибки уведомлений в стабильные gRPC codes.
 func grpcError(err error) error {
 	switch {
 	case stderrors.Is(err, apperrors.ErrInvalidArgument):

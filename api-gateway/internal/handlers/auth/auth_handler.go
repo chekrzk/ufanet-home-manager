@@ -12,10 +12,14 @@ type Handler struct {
 	service Service
 }
 
+// NewHandler принимает service через интерфейс, чтобы HTTP-слой зависел от
+// нужного поведения, а не от конкретной реализации auth-сервиса.
 func NewHandler(service Service) *Handler {
 	return &Handler{service: service}
 }
 
+// Login переводит HTTP credentials в domain-команду и оставляет проверку
+// пароля auth-сценарию.
 func (h *Handler) Login(c *fiber.Ctx) error {
 	req, err := gwerrors.ParseBody[dto.LoginRequest](c)
 	if err != nil {
@@ -33,6 +37,8 @@ func (h *Handler) Login(c *fiber.Ctx) error {
 	return gwerrors.OK(c, tokens)
 }
 
+// Register валидирует входной JSON до service layer, чтобы бизнес-сценарий
+// работал уже с полной командой регистрации.
 func (h *Handler) Register(c *fiber.Ctx) error {
 	req, err := gwerrors.ParseBody[dto.RegisterRequest](c)
 	if err != nil {
@@ -52,6 +58,8 @@ func (h *Handler) Register(c *fiber.Ctx) error {
 	return gwerrors.Created(c, user)
 }
 
+// Refresh не читает JWT из header, потому что обновление основано на отдельном
+// refresh token из тела запроса.
 func (h *Handler) Refresh(c *fiber.Ctx) error {
 	req, err := gwerrors.ParseBody[dto.RefreshRequest](c)
 	if err != nil {

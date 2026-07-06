@@ -17,6 +17,8 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Run поднимает notification-service с DB и Redis, чтобы хранение уведомлений
+// и публикация событий запускались как единый lifecycle.
 func Run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()

@@ -15,10 +15,13 @@ type Service struct {
 	log  zerolog.Logger
 }
 
+// New получает repository через интерфейс, чтобы бизнес-сценарии профиля не
+// зависели от GORM и могли проверяться unit-тестами.
 func New(repo ProfileRepository, log zerolog.Logger) *Service {
 	return &Service{repo: repo, log: log}
 }
 
+// Me возвращает профиль по identity из токена, чтобы клиент не выбирал чужой userID.
 func (s *Service) Me(ctx context.Context, actor models.UserContext) (models.Profile, error) {
 	if strings.TrimSpace(actor.UserID) == "" {
 		return models.Profile{}, apperrors.ErrInvalidArgument
@@ -30,6 +33,8 @@ func (s *Service) Me(ctx context.Context, actor models.UserContext) (models.Prof
 	return profile, err
 }
 
+// Update хранит привязку к дому в profile-service, чтобы auth-service оставался
+// только источником учетной записи и роли.
 func (s *Service) Update(ctx context.Context, cmd models.UpdateProfileCommand) (models.Profile, error) {
 	if strings.TrimSpace(cmd.Actor.UserID) == "" || strings.TrimSpace(cmd.FullName) == "" {
 		return models.Profile{}, apperrors.ErrInvalidArgument
@@ -46,6 +51,8 @@ func (s *Service) Update(ctx context.Context, cmd models.UpdateProfileCommand) (
 	return profile, nil
 }
 
+// AddWorker централизует управление исполнителями, чтобы заявки могли назначать
+// работников из проверенного списка дома.
 func (s *Service) AddWorker(ctx context.Context, cmd models.AddWorkerCommand) (models.Worker, error) {
 	if !canManageWorkers(cmd.Actor.Role) {
 		return models.Worker{}, apperrors.ErrForbidden
@@ -70,6 +77,7 @@ func (s *Service) AddWorker(ctx context.Context, cmd models.AddWorkerCommand) (m
 	return worker, nil
 }
 
+// ListWorkers ограничивает видимость работников ролью и домом управляющего.
 func (s *Service) ListWorkers(ctx context.Context, filter models.ListWorkersFilter) ([]models.Worker, error) {
 	if !canManageWorkers(filter.Actor.Role) {
 		return nil, apperrors.ErrForbidden
@@ -81,6 +89,8 @@ func (s *Service) ListWorkers(ctx context.Context, filter models.ListWorkersFilt
 	return s.repo.ListWorkers(ctx, houseID)
 }
 
+// SetWorkerAvailability позволяет работнику публиковать доступное время, чтобы
+// заявка выбирала реального исполнителя, а не абстрактную услугу.
 func (s *Service) SetWorkerAvailability(ctx context.Context, cmd models.SetWorkerAvailabilityCommand) (models.WorkerAvailability, error) {
 	if cmd.Worker.Role != "employee" {
 		return models.WorkerAvailability{}, apperrors.ErrForbidden
@@ -101,6 +111,7 @@ func (s *Service) SetWorkerAvailability(ctx context.Context, cmd models.SetWorke
 	return availability, nil
 }
 
+// ListWorkerAvailability подбирает доступных работников по дому и специализации.
 func (s *Service) ListWorkerAvailability(ctx context.Context, filter models.ListWorkerAvailabilityFilter) ([]models.WorkerAvailability, error) {
 	if filter.Actor.Role == "resident" && strings.TrimSpace(filter.Specialization) == "" {
 		return nil, apperrors.ErrInvalidArgument
@@ -111,10 +122,12 @@ func (s *Service) ListWorkerAvailability(ctx context.Context, filter models.List
 	return s.repo.ListWorkerAvailability(ctx, filter)
 }
 
+// canManageWorkers фиксирует роли, которым разрешено администрировать работников.
 func canManageWorkers(role string) bool {
 	return role == "admin" || role == "manager"
 }
 
+// ensureManagerHouse защищает дом от управления чужим manager-аккаунтом.
 func (s *Service) ensureManagerHouse(ctx context.Context, actor models.UserContext, houseID string) error {
 	if actor.Role != "manager" {
 		return nil
