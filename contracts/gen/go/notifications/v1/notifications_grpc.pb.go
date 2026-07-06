@@ -20,9 +20,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	NotificationsService_RegisterDevice_FullMethodName   = "/ufanet.home_manager.notifications.v1.NotificationsService/RegisterDevice"
-	NotificationsService_UnregisterDevice_FullMethodName = "/ufanet.home_manager.notifications.v1.NotificationsService/UnregisterDevice"
-	NotificationsService_Publish_FullMethodName          = "/ufanet.home_manager.notifications.v1.NotificationsService/Publish"
+	NotificationsService_RegisterDevice_FullMethodName    = "/ufanet.home_manager.notifications.v1.NotificationsService/RegisterDevice"
+	NotificationsService_UnregisterDevice_FullMethodName  = "/ufanet.home_manager.notifications.v1.NotificationsService/UnregisterDevice"
+	NotificationsService_Publish_FullMethodName           = "/ufanet.home_manager.notifications.v1.NotificationsService/Publish"
+	NotificationsService_ListNotifications_FullMethodName = "/ufanet.home_manager.notifications.v1.NotificationsService/ListNotifications"
+	NotificationsService_MarkRead_FullMethodName          = "/ufanet.home_manager.notifications.v1.NotificationsService/MarkRead"
 )
 
 // NotificationsServiceClient is the client API for NotificationsService service.
@@ -32,6 +34,8 @@ type NotificationsServiceClient interface {
 	RegisterDevice(ctx context.Context, in *RegisterDeviceRequest, opts ...grpc.CallOption) (*v1.Empty, error)
 	UnregisterDevice(ctx context.Context, in *UnregisterDeviceRequest, opts ...grpc.CallOption) (*v1.Empty, error)
 	Publish(ctx context.Context, in *PublishNotificationRequest, opts ...grpc.CallOption) (*v1.Empty, error)
+	ListNotifications(ctx context.Context, in *ListNotificationsRequest, opts ...grpc.CallOption) (*ListNotificationsResponse, error)
+	MarkRead(ctx context.Context, in *MarkReadRequest, opts ...grpc.CallOption) (*v1.Empty, error)
 }
 
 type notificationsServiceClient struct {
@@ -72,6 +76,26 @@ func (c *notificationsServiceClient) Publish(ctx context.Context, in *PublishNot
 	return out, nil
 }
 
+func (c *notificationsServiceClient) ListNotifications(ctx context.Context, in *ListNotificationsRequest, opts ...grpc.CallOption) (*ListNotificationsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListNotificationsResponse)
+	err := c.cc.Invoke(ctx, NotificationsService_ListNotifications_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *notificationsServiceClient) MarkRead(ctx context.Context, in *MarkReadRequest, opts ...grpc.CallOption) (*v1.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Empty)
+	err := c.cc.Invoke(ctx, NotificationsService_MarkRead_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NotificationsServiceServer is the server API for NotificationsService service.
 // All implementations must embed UnimplementedNotificationsServiceServer
 // for forward compatibility.
@@ -79,6 +103,8 @@ type NotificationsServiceServer interface {
 	RegisterDevice(context.Context, *RegisterDeviceRequest) (*v1.Empty, error)
 	UnregisterDevice(context.Context, *UnregisterDeviceRequest) (*v1.Empty, error)
 	Publish(context.Context, *PublishNotificationRequest) (*v1.Empty, error)
+	ListNotifications(context.Context, *ListNotificationsRequest) (*ListNotificationsResponse, error)
+	MarkRead(context.Context, *MarkReadRequest) (*v1.Empty, error)
 	mustEmbedUnimplementedNotificationsServiceServer()
 }
 
@@ -97,6 +123,12 @@ func (UnimplementedNotificationsServiceServer) UnregisterDevice(context.Context,
 }
 func (UnimplementedNotificationsServiceServer) Publish(context.Context, *PublishNotificationRequest) (*v1.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method Publish not implemented")
+}
+func (UnimplementedNotificationsServiceServer) ListNotifications(context.Context, *ListNotificationsRequest) (*ListNotificationsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListNotifications not implemented")
+}
+func (UnimplementedNotificationsServiceServer) MarkRead(context.Context, *MarkReadRequest) (*v1.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method MarkRead not implemented")
 }
 func (UnimplementedNotificationsServiceServer) mustEmbedUnimplementedNotificationsServiceServer() {}
 func (UnimplementedNotificationsServiceServer) testEmbeddedByValue()                              {}
@@ -173,6 +205,42 @@ func _NotificationsService_Publish_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NotificationsService_ListNotifications_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListNotificationsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationsServiceServer).ListNotifications(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NotificationsService_ListNotifications_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationsServiceServer).ListNotifications(ctx, req.(*ListNotificationsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NotificationsService_MarkRead_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MarkReadRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationsServiceServer).MarkRead(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NotificationsService_MarkRead_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationsServiceServer).MarkRead(ctx, req.(*MarkReadRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // NotificationsService_ServiceDesc is the grpc.ServiceDesc for NotificationsService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -191,6 +259,14 @@ var NotificationsService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Publish",
 			Handler:    _NotificationsService_Publish_Handler,
+		},
+		{
+			MethodName: "ListNotifications",
+			Handler:    _NotificationsService_ListNotifications_Handler,
+		},
+		{
+			MethodName: "MarkRead",
+			Handler:    _NotificationsService_MarkRead_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

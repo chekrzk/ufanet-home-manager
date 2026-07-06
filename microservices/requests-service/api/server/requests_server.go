@@ -7,10 +7,8 @@ import (
 	commonv1 "github.com/chekrzk/ufanet-home-manager/contracts/gen/go/common/v1"
 	requestsv1 "github.com/chekrzk/ufanet-home-manager/contracts/gen/go/requests/v1"
 	apperrors "github.com/chekrzk/ufanet-home-manager/requests-service/internal/errors"
-	"github.com/chekrzk/ufanet-home-manager/requests-service/internal/models"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type Server struct {
@@ -23,11 +21,7 @@ func New(service RequestsService) *Server {
 }
 
 func (s *Server) CreateRequest(ctx context.Context, req *requestsv1.CreateRequestRequest) (*commonv1.MaintenanceRequest, error) {
-	request, err := s.service.Create(ctx, models.CreateRequestCommand{
-		User:        userContext(req.GetUser()),
-		Category:    req.GetCategory(),
-		Description: req.GetDescription(),
-	})
+	request, err := s.service.Create(ctx, createRequestCommandFromProto(req))
 	if err != nil {
 		return nil, grpcError(err)
 	}
@@ -35,13 +29,7 @@ func (s *Server) CreateRequest(ctx context.Context, req *requestsv1.CreateReques
 }
 
 func (s *Server) ListRequests(ctx context.Context, req *requestsv1.ListRequestsRequest) (*requestsv1.ListRequestsResponse, error) {
-	page, err := s.service.List(ctx, models.ListRequestsFilter{
-		Actor: userContext(req.GetUser()),
-		Pagination: models.Pagination{
-			Page:  int(req.GetPagination().GetPage()),
-			Limit: int(req.GetPagination().GetLimit()),
-		},
-	})
+	page, err := s.service.List(ctx, listRequestsFilterFromProto(req))
 	if err != nil {
 		return nil, grpcError(err)
 	}
@@ -53,7 +41,7 @@ func (s *Server) ListRequests(ctx context.Context, req *requestsv1.ListRequestsR
 }
 
 func (s *Server) GetRequest(ctx context.Context, req *requestsv1.GetRequestRequest) (*commonv1.MaintenanceRequest, error) {
-	request, err := s.service.Get(ctx, models.GetRequestCommand{Actor: userContext(req.GetUser()), RequestID: req.GetRequestId()})
+	request, err := s.service.Get(ctx, getRequestCommandFromProto(req))
 	if err != nil {
 		return nil, grpcError(err)
 	}
@@ -61,12 +49,7 @@ func (s *Server) GetRequest(ctx context.Context, req *requestsv1.GetRequestReque
 }
 
 func (s *Server) UpdateRequestStatus(ctx context.Context, req *requestsv1.UpdateRequestStatusRequest) (*commonv1.MaintenanceRequest, error) {
-	request, err := s.service.UpdateStatus(ctx, models.UpdateRequestStatusCommand{
-		Actor:      userContext(req.GetActor()),
-		RequestID:  req.GetRequestId(),
-		Status:     req.GetStatus(),
-		AssignedTo: req.GetAssignedTo(),
-	})
+	request, err := s.service.UpdateStatus(ctx, updateRequestStatusCommandFromProto(req))
 	if err != nil {
 		return nil, grpcError(err)
 	}
@@ -74,35 +57,11 @@ func (s *Server) UpdateRequestStatus(ctx context.Context, req *requestsv1.Update
 }
 
 func (s *Server) AddRequestComment(ctx context.Context, req *requestsv1.AddRequestCommentRequest) (*commonv1.Empty, error) {
-	err := s.service.AddComment(ctx, models.AddRequestCommentCommand{
-		Actor:     userContext(req.GetUser()),
-		RequestID: req.GetRequestId(),
-		Text:      req.GetText(),
-	})
+	err := s.service.AddComment(ctx, addRequestCommentCommandFromProto(req))
 	if err != nil {
 		return nil, grpcError(err)
 	}
 	return &commonv1.Empty{}, nil
-}
-
-func userContext(user *commonv1.UserContext) models.UserContext {
-	if user == nil {
-		return models.UserContext{}
-	}
-	return models.UserContext{UserID: user.GetUserId(), Role: user.GetRole()}
-}
-
-func requestToProto(request models.MaintenanceRequest) *commonv1.MaintenanceRequest {
-	return &commonv1.MaintenanceRequest{
-		Id:          request.ID,
-		UserId:      request.UserID,
-		Category:    request.Category,
-		Description: request.Description,
-		Status:      request.Status,
-		CreatedAt:   timestamppb.New(request.CreatedAt),
-		UpdatedAt:   timestamppb.New(request.UpdatedAt),
-		AssignedTo:  request.AssignedTo,
-	}
 }
 
 func grpcError(err error) error {

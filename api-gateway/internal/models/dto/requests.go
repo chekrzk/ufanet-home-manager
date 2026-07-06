@@ -1,8 +1,13 @@
 package dto
 
 type CreateRequestRequest struct {
-	Category    string `json:"category"`
-	Description string `json:"description"`
+	Category         string `json:"category"`
+	Description      string `json:"description"`
+	PreferredDate    string `json:"preferred_date"`
+	AssignedWorkerID string `json:"assigned_worker_id"`
+	Address          string `json:"address"`
+	Apartment        string `json:"apartment"`
+	Phone            string `json:"phone"`
 }
 
 func (r CreateRequestRequest) Validate() map[string]string {

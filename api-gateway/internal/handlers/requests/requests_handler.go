@@ -24,8 +24,13 @@ func (h *Handler) Create(c *fiber.Ctx) error {
 	}
 
 	request, err := h.service.Create(c.Context(), authContext(c), domain.CreateRequest{
-		Category:    req.Category,
-		Description: req.Description,
+		Category:         req.Category,
+		Description:      req.Description,
+		PreferredDate:    req.PreferredDate,
+		AssignedWorkerID: req.AssignedWorkerID,
+		Address:          req.Address,
+		Apartment:        req.Apartment,
+		Phone:            req.Phone,
 	})
 	if err != nil {
 		return gwerrors.FromGRPC(err)

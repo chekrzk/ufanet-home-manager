@@ -20,10 +20,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ProfileService_Me_FullMethodName          = "/ufanet.home_manager.profile.v1.ProfileService/Me"
-	ProfileService_Update_FullMethodName      = "/ufanet.home_manager.profile.v1.ProfileService/Update"
-	ProfileService_AddWorker_FullMethodName   = "/ufanet.home_manager.profile.v1.ProfileService/AddWorker"
-	ProfileService_ListWorkers_FullMethodName = "/ufanet.home_manager.profile.v1.ProfileService/ListWorkers"
+	ProfileService_Me_FullMethodName                     = "/ufanet.home_manager.profile.v1.ProfileService/Me"
+	ProfileService_Update_FullMethodName                 = "/ufanet.home_manager.profile.v1.ProfileService/Update"
+	ProfileService_AddWorker_FullMethodName              = "/ufanet.home_manager.profile.v1.ProfileService/AddWorker"
+	ProfileService_ListWorkers_FullMethodName            = "/ufanet.home_manager.profile.v1.ProfileService/ListWorkers"
+	ProfileService_SetWorkerAvailability_FullMethodName  = "/ufanet.home_manager.profile.v1.ProfileService/SetWorkerAvailability"
+	ProfileService_ListWorkerAvailability_FullMethodName = "/ufanet.home_manager.profile.v1.ProfileService/ListWorkerAvailability"
 )
 
 // ProfileServiceClient is the client API for ProfileService service.
@@ -34,6 +36,8 @@ type ProfileServiceClient interface {
 	Update(ctx context.Context, in *UpdateProfileRequest, opts ...grpc.CallOption) (*v1.User, error)
 	AddWorker(ctx context.Context, in *AddWorkerRequest, opts ...grpc.CallOption) (*v1.Worker, error)
 	ListWorkers(ctx context.Context, in *ListWorkersRequest, opts ...grpc.CallOption) (*ListWorkersResponse, error)
+	SetWorkerAvailability(ctx context.Context, in *SetWorkerAvailabilityRequest, opts ...grpc.CallOption) (*v1.WorkerAvailability, error)
+	ListWorkerAvailability(ctx context.Context, in *ListWorkerAvailabilityRequest, opts ...grpc.CallOption) (*ListWorkerAvailabilityResponse, error)
 }
 
 type profileServiceClient struct {
@@ -84,6 +88,26 @@ func (c *profileServiceClient) ListWorkers(ctx context.Context, in *ListWorkersR
 	return out, nil
 }
 
+func (c *profileServiceClient) SetWorkerAvailability(ctx context.Context, in *SetWorkerAvailabilityRequest, opts ...grpc.CallOption) (*v1.WorkerAvailability, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.WorkerAvailability)
+	err := c.cc.Invoke(ctx, ProfileService_SetWorkerAvailability_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *profileServiceClient) ListWorkerAvailability(ctx context.Context, in *ListWorkerAvailabilityRequest, opts ...grpc.CallOption) (*ListWorkerAvailabilityResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListWorkerAvailabilityResponse)
+	err := c.cc.Invoke(ctx, ProfileService_ListWorkerAvailability_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProfileServiceServer is the server API for ProfileService service.
 // All implementations must embed UnimplementedProfileServiceServer
 // for forward compatibility.
@@ -92,6 +116,8 @@ type ProfileServiceServer interface {
 	Update(context.Context, *UpdateProfileRequest) (*v1.User, error)
 	AddWorker(context.Context, *AddWorkerRequest) (*v1.Worker, error)
 	ListWorkers(context.Context, *ListWorkersRequest) (*ListWorkersResponse, error)
+	SetWorkerAvailability(context.Context, *SetWorkerAvailabilityRequest) (*v1.WorkerAvailability, error)
+	ListWorkerAvailability(context.Context, *ListWorkerAvailabilityRequest) (*ListWorkerAvailabilityResponse, error)
 	mustEmbedUnimplementedProfileServiceServer()
 }
 
@@ -113,6 +139,12 @@ func (UnimplementedProfileServiceServer) AddWorker(context.Context, *AddWorkerRe
 }
 func (UnimplementedProfileServiceServer) ListWorkers(context.Context, *ListWorkersRequest) (*ListWorkersResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListWorkers not implemented")
+}
+func (UnimplementedProfileServiceServer) SetWorkerAvailability(context.Context, *SetWorkerAvailabilityRequest) (*v1.WorkerAvailability, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetWorkerAvailability not implemented")
+}
+func (UnimplementedProfileServiceServer) ListWorkerAvailability(context.Context, *ListWorkerAvailabilityRequest) (*ListWorkerAvailabilityResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListWorkerAvailability not implemented")
 }
 func (UnimplementedProfileServiceServer) mustEmbedUnimplementedProfileServiceServer() {}
 func (UnimplementedProfileServiceServer) testEmbeddedByValue()                        {}
@@ -207,6 +239,42 @@ func _ProfileService_ListWorkers_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProfileService_SetWorkerAvailability_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetWorkerAvailabilityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProfileServiceServer).SetWorkerAvailability(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProfileService_SetWorkerAvailability_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProfileServiceServer).SetWorkerAvailability(ctx, req.(*SetWorkerAvailabilityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProfileService_ListWorkerAvailability_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListWorkerAvailabilityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProfileServiceServer).ListWorkerAvailability(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProfileService_ListWorkerAvailability_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProfileServiceServer).ListWorkerAvailability(ctx, req.(*ListWorkerAvailabilityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProfileService_ServiceDesc is the grpc.ServiceDesc for ProfileService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -229,6 +297,14 @@ var ProfileService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListWorkers",
 			Handler:    _ProfileService_ListWorkers_Handler,
+		},
+		{
+			MethodName: "SetWorkerAvailability",
+			Handler:    _ProfileService_SetWorkerAvailability_Handler,
+		},
+		{
+			MethodName: "ListWorkerAvailability",
+			Handler:    _ProfileService_ListWorkerAvailability_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

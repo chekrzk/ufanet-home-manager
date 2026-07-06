@@ -43,7 +43,7 @@ func (s *AuthService) Register(ctx context.Context, cmd models.RegisterCommand) 
 	user := models.User{
 		Phone:        strings.TrimSpace(cmd.Phone),
 		PasswordHash: hash,
-		Role:         models.RoleResident,
+		Role:         registerRole(cmd.Role),
 	}
 	if err := s.users.Create(ctx, &user); err != nil {
 		return models.User{}, err
@@ -95,4 +95,13 @@ func validateRegister(cmd models.RegisterCommand) error {
 		return apperrors.ErrInvalidArgument
 	}
 	return nil
+}
+
+func registerRole(role string) models.Role {
+	switch strings.TrimSpace(role) {
+	case string(models.RoleEmployee):
+		return models.RoleEmployee
+	default:
+		return models.RoleResident
+	}
 }

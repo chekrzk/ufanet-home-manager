@@ -22,3 +22,26 @@ type AddWorker struct {
 	Phone          string
 	HouseID        string
 }
+
+type WorkerAvailability struct {
+	ID             string `json:"id"`
+	WorkerID       string `json:"worker_id,omitempty"`
+	UserID         string `json:"user_id"`
+	Specialization string `json:"specialization"`
+	HouseID        string `json:"house_id"`
+	AvailableDate  string `json:"available_date"`
+	AvailableTime  string `json:"available_time"`
+}
+
+type SetWorkerAvailability struct {
+	Specialization string
+	HouseID        string
+	AvailableDate  string
+	AvailableTime  string
+}
+
+type WorkerAvailabilityFilter struct {
+	HouseID        string
+	Specialization string
+	AvailableDate  string
+}

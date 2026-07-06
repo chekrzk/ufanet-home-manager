@@ -74,8 +74,56 @@ func (c *Client) ListWorkers(ctx context.Context, actor domain.AuthContext, hous
 	return items, nil
 }
 
+func (c *Client) SetWorkerAvailability(ctx context.Context, actor domain.AuthContext, command domain.SetWorkerAvailability) (domain.WorkerAvailability, error) {
+	c.log.Debug().Str("user_id", actor.UserID).Str("house_id", command.HouseID).Msg("call profile grpc set worker availability")
+	resp, err := c.client.SetWorkerAvailability(ctx, &profilev1.SetWorkerAvailabilityRequest{
+		Worker:         userContext(actor),
+		Specialization: command.Specialization,
+		HouseId:        command.HouseID,
+		AvailableDate:  command.AvailableDate,
+		AvailableTime:  command.AvailableTime,
+	})
+	if err != nil {
+		return domain.WorkerAvailability{}, err
+	}
+	return availabilityFromProto(resp), nil
+}
+
+func (c *Client) ListWorkerAvailability(ctx context.Context, actor domain.AuthContext, filter domain.WorkerAvailabilityFilter) ([]domain.WorkerAvailability, error) {
+	c.log.Debug().Str("user_id", actor.UserID).Str("house_id", filter.HouseID).Msg("call profile grpc list worker availability")
+	resp, err := c.client.ListWorkerAvailability(ctx, &profilev1.ListWorkerAvailabilityRequest{
+		Actor:          userContext(actor),
+		HouseId:        filter.HouseID,
+		Specialization: filter.Specialization,
+		AvailableDate:  filter.AvailableDate,
+	})
+	if err != nil {
+		return nil, err
+	}
+	items := make([]domain.WorkerAvailability, 0, len(resp.GetItems()))
+	for _, item := range resp.GetItems() {
+		items = append(items, availabilityFromProto(item))
+	}
+	return items, nil
+}
+
 func userContext(actor domain.AuthContext) *commonv1.UserContext {
 	return &commonv1.UserContext{UserId: actor.UserID, Role: actor.Role}
+}
+
+func availabilityFromProto(item *commonv1.WorkerAvailability) domain.WorkerAvailability {
+	if item == nil {
+		return domain.WorkerAvailability{}
+	}
+	return domain.WorkerAvailability{
+		ID:             item.GetId(),
+		WorkerID:       item.GetWorkerId(),
+		UserID:         item.GetUserId(),
+		Specialization: item.GetSpecialization(),
+		HouseID:        item.GetHouseId(),
+		AvailableDate:  item.GetAvailableDate(),
+		AvailableTime:  item.GetAvailableTime(),
+	}
 }
 
 func userFromProto(user *commonv1.User) domain.User {

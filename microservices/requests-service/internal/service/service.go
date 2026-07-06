@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"strings"
+	"time"
 
 	apperrors "github.com/chekrzk/ufanet-home-manager/requests-service/internal/errors"
 	"github.com/chekrzk/ufanet-home-manager/requests-service/internal/models"
@@ -24,13 +25,22 @@ func (s *Service) Create(ctx context.Context, cmd models.CreateRequestCommand) (
 		return models.MaintenanceRequest{}, apperrors.ErrInvalidArgument
 	}
 	request := models.MaintenanceRequest{
-		UserID:      cmd.User.UserID,
-		Category:    strings.TrimSpace(cmd.Category),
-		Description: strings.TrimSpace(cmd.Description),
-		Status:      models.RequestStatusNew,
+		UserID:        cmd.User.UserID,
+		Category:      strings.TrimSpace(cmd.Category),
+		Description:   strings.TrimSpace(cmd.Description),
+		Status:        models.RequestStatusNew,
+		PreferredDate: strings.TrimSpace(cmd.PreferredDate),
+		Address:       strings.TrimSpace(cmd.Address),
+		Apartment:     strings.TrimSpace(cmd.Apartment),
+		Phone:         strings.TrimSpace(cmd.Phone),
 	}
+	assignRequest(&request, cmd.AssignedWorkerID)
 	if err := s.repo.Create(ctx, &request); err != nil {
 		return models.MaintenanceRequest{}, err
+	}
+	s.publishTo(ctx, request.UserID, request, "request.created", "New request created", "Request status: "+request.Status)
+	if request.AssignedTo != nil {
+		s.publishTo(ctx, *request.AssignedTo, request, "request.assigned", "New request assigned", request.Description)
 	}
 	return request, nil
 }
@@ -69,8 +79,21 @@ func (s *Service) UpdateStatus(ctx context.Context, cmd models.UpdateRequestStat
 	if err != nil {
 		return models.MaintenanceRequest{}, err
 	}
-	request.Status = strings.TrimSpace(cmd.Status)
-	request.AssignedTo = strings.TrimSpace(cmd.AssignedTo)
+	status := strings.TrimSpace(cmd.Status)
+	if !validStatus(status) {
+		return models.MaintenanceRequest{}, apperrors.ErrInvalidArgument
+	}
+	now := time.Now()
+	request.Status = status
+	assignRequest(&request, cmd.AssignedTo)
+	switch status {
+	case models.RequestStatusInProgress:
+		request.AcceptedAt = &now
+	case models.RequestStatusCanceled:
+		request.DeclinedAt = &now
+	case models.RequestStatusDone:
+		request.CompletedAt = &now
+	}
 	if err := s.repo.Save(ctx, &request); err != nil {
 		return models.MaintenanceRequest{}, err
 	}
@@ -97,11 +120,15 @@ func (s *Service) AddComment(ctx context.Context, cmd models.AddRequestCommentCo
 }
 
 func (s *Service) publish(ctx context.Context, request models.MaintenanceRequest, eventType string, title string, body string) {
+	s.publishTo(ctx, request.UserID, request, eventType, title, body)
+}
+
+func (s *Service) publishTo(ctx context.Context, userID string, request models.MaintenanceRequest, eventType string, title string, body string) {
 	if s.publisher == nil {
 		return
 	}
 	if err := s.publisher.Publish(ctx, models.NotificationEvent{
-		UserID:   request.UserID,
+		UserID:   userID,
 		Type:     eventType,
 		Title:    title,
 		Body:     body,
@@ -113,4 +140,22 @@ func (s *Service) publish(ctx context.Context, request models.MaintenanceRequest
 
 func canManageRequests(role string) bool {
 	return role == "admin" || role == "manager" || role == "employee"
+}
+
+func validStatus(status string) bool {
+	switch status {
+	case models.RequestStatusNew, models.RequestStatusInProgress, models.RequestStatusDone, models.RequestStatusCanceled:
+		return true
+	default:
+		return false
+	}
+}
+
+func assignRequest(request *models.MaintenanceRequest, assignedTo string) {
+	assignedTo = strings.TrimSpace(assignedTo)
+	if assignedTo == "" {
+		request.AssignedTo = nil
+		return
+	}
+	request.AssignedTo = &assignedTo
 }

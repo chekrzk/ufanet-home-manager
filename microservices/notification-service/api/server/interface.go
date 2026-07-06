@@ -10,4 +10,6 @@ type NotificationService interface {
 	RegisterDevice(ctx context.Context, cmd models.RegisterDeviceCommand) error
 	UnregisterDevice(ctx context.Context, cmd models.UnregisterDeviceCommand) error
 	Publish(ctx context.Context, cmd models.PublishNotificationCommand) error
+	List(ctx context.Context, cmd models.ListNotificationsCommand) (models.NotificationsPage, error)
+	MarkRead(ctx context.Context, user models.UserContext, notificationID string) error
 }
