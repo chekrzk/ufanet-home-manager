@@ -17,6 +17,8 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Run поднимает requests-service с DB и notification client, чтобы изменение
+// заявок сразу могло создавать связанные события для пользователей.
 func Run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()

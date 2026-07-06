@@ -13,10 +13,12 @@ type Handler struct {
 	service Service
 }
 
+// NewHandler держит HTTP-слой зависимым от сценариев новостей, а не от gRPC.
 func NewHandler(service Service) *Handler {
 	return &Handler{service: service}
 }
 
+// List собирает фильтр ленты из query params и auth context для downstream rules.
 func (h *Handler) List(c *fiber.Ctx) error {
 	var req dto.ListNewsRequest
 	if err := c.QueryParser(&req); err != nil {
@@ -36,6 +38,8 @@ func (h *Handler) List(c *fiber.Ctx) error {
 	return gwerrors.OK(c, page)
 }
 
+// Create переводит HTTP DTO в команду публикации, чтобы handler не решал
+// права и side effects новости.
 func (h *Handler) Create(c *fiber.Ctx) error {
 	req, err := gwerrors.ParseBody[dto.CreateNewsRequest](c)
 	if err != nil {
@@ -54,6 +58,7 @@ func (h *Handler) Create(c *fiber.Ctx) error {
 	return gwerrors.Created(c, item)
 }
 
+// authContext переносит результат JWT middleware в domain-модель.
 func authContext(c *fiber.Ctx) domain.AuthContext {
 	userID, _ := c.Locals(constant.CtxUserID).(string)
 	role, _ := c.Locals(constant.CtxRole).(string)

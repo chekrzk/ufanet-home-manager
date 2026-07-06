@@ -36,6 +36,8 @@ type container struct {
 	conns    []*grpc.ClientConn
 }
 
+// newContainer централизует wiring зависимостей, чтобы handlers и services
+// получали готовые интерфейсы, а не создавали клиентов и соединения сами.
 func newContainer(cfg *config.Config, log zerolog.Logger) (*container, error) {
 	conns, err := newGRPCConnections(cfg.Service)
 	if err != nil {
@@ -73,6 +75,8 @@ func newContainer(cfg *config.Config, log zerolog.Logger) (*container, error) {
 	}, nil
 }
 
+// Close закрывает внешние соединения в одном месте, чтобы graceful shutdown
+// не зависел от деталей каждого клиента.
 func (c *container) Close() {
 	for _, conn := range c.conns {
 		if conn == nil {
@@ -92,6 +96,7 @@ type grpcConnections struct {
 	profile       *grpc.ClientConn
 }
 
+// all нужен для единообразного освобождения всех gRPC connections контейнера.
 func (c grpcConnections) all() []*grpc.ClientConn {
 	return []*grpc.ClientConn{
 		c.auth,
@@ -102,6 +107,8 @@ func (c grpcConnections) all() []*grpc.ClientConn {
 	}
 }
 
+// newGRPCConnections открывает все upstream-соединения заранее, чтобы gateway
+// падал на старте при неверной конфигурации, а не на первом пользовательском запросе.
 func newGRPCConnections(cfg config.ServiceConfig) (grpcConnections, error) {
 	var conns grpcConnections
 
@@ -138,10 +145,13 @@ func newGRPCConnections(cfg config.ServiceConfig) (grpcConnections, error) {
 	return conns, nil
 }
 
+// dial изолирует способ подключения к gRPC, чтобы позже проще добавить TLS,
+// retry policy или tracing без изменений в сборке контейнера.
 func dial(addr string) (*grpc.ClientConn, error) {
 	return grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 }
 
+// closeGRPCConnections чистит уже открытые соединения при частичной ошибке старта.
 func closeGRPCConnections(conns ...*grpc.ClientConn) {
 	for _, conn := range conns {
 		if conn != nil {

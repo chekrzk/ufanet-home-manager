@@ -16,10 +16,14 @@ type Server struct {
 	service AuthService
 }
 
+// New связывает gRPC procedures с auth service interface, чтобы transport не
+// создавал бизнес-зависимости самостоятельно.
 func New(service AuthService) *Server {
 	return &Server{service: service}
 }
 
+// Login конвертирует proto-запрос в доменную команду, чтобы service layer не
+// зависел от формата gRPC-контракта.
 func (s *Server) Login(ctx context.Context, req *authv1.LoginRequest) (*authv1.AuthTokens, error) {
 	tokens, err := s.service.Login(ctx, loginCommandFromProto(req))
 	if err != nil {
@@ -28,6 +32,8 @@ func (s *Server) Login(ctx context.Context, req *authv1.LoginRequest) (*authv1.A
 	return tokensToProto(tokens), nil
 }
 
+// Register оставляет создание учетной записи auth service, а server отвечает
+// только за transport mapping и gRPC error.
 func (s *Server) Register(ctx context.Context, req *authv1.RegisterRequest) (*commonv1.User, error) {
 	user, err := s.service.Register(ctx, registerCommandFromProto(req))
 	if err != nil {
@@ -36,6 +42,7 @@ func (s *Server) Register(ctx context.Context, req *authv1.RegisterRequest) (*co
 	return userToProto(user), nil
 }
 
+// Refresh держит обновление токенов в auth service и возвращает proto-ответ gateway.
 func (s *Server) Refresh(ctx context.Context, req *authv1.RefreshRequest) (*authv1.AuthTokens, error) {
 	tokens, err := s.service.Refresh(ctx, req.GetRefreshToken())
 	if err != nil {
@@ -44,6 +51,7 @@ func (s *Server) Refresh(ctx context.Context, req *authv1.RefreshRequest) (*auth
 	return tokensToProto(tokens), nil
 }
 
+// grpcError переводит доменные ошибки в стабильные gRPC status codes.
 func grpcError(err error) error {
 	switch {
 	case stderrors.Is(err, apperrors.ErrInvalidArgument):

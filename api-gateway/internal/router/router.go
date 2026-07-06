@@ -22,6 +22,8 @@ type Router struct {
 	h   Handlers
 }
 
+// New получает уже собранные handlers и middleware, чтобы router отвечал только
+// за карту HTTP routes, а не за создание зависимостей.
 func New(app *fiber.App, mw *middlewares.Middlewares, h Handlers) *Router {
 	return &Router{
 		app: app,
@@ -30,6 +32,7 @@ func New(app *fiber.App, mw *middlewares.Middlewares, h Handlers) *Router {
 	}
 }
 
+// Register собирает публичные и защищенные группы маршрутов в одном месте.
 func (r *Router) Register() {
 	r.app.Use(r.mw.Logger())
 	r.app.Use(r.mw.CORS())
@@ -40,10 +43,13 @@ func (r *Router) Register() {
 	r.protected()
 }
 
+// health остается публичным, чтобы оркестратор мог проверять gateway без JWT.
 func (r *Router) health() {
 	r.app.Get("/health", r.h.Health.Check)
 }
 
+// auth оставляет login/register/refresh вне protected-группы, потому что эти
+// endpoints сами создают или обновляют авторизацию.
 func (r *Router) auth() {
 	auth := r.app.Group("/auth")
 	auth.Post("/login", r.h.Auth.Login)
@@ -52,6 +58,8 @@ func (r *Router) auth() {
 	auth.Post("/refresh", r.h.Auth.Refresh)
 }
 
+// protected применяет JWT и role middleware к пользовательским сценариям,
+// чтобы handlers не дублировали базовую авторизацию.
 func (r *Router) protected() {
 	api := r.app.Group("", r.mw.Blacklist(), r.mw.JWT())
 

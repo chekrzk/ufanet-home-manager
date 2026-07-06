@@ -18,10 +18,14 @@ type AuthService struct {
 	log    zerolog.Logger
 }
 
+// NewAuthService получает зависимости снаружи, чтобы авторизация не создавала
+// DB, hasher или JWT manager внутри бизнес-слоя.
 func NewAuthService(users UserRepository, hasher *hasher.Hasher, tokens *jwtmanager.Manager, log zerolog.Logger) *AuthService {
 	return &AuthService{users: users, hasher: hasher, tokens: tokens, log: log}
 }
 
+// Register создает identity пользователя и хранит только password hash, чтобы
+// остальные сервисы могли доверять auth-service как источнику учетных записей.
 func (s *AuthService) Register(ctx context.Context, cmd models.RegisterCommand) (models.User, error) {
 	if err := validateRegister(cmd); err != nil {
 		return models.User{}, err
@@ -53,6 +57,8 @@ func (s *AuthService) Register(ctx context.Context, cmd models.RegisterCommand) 
 	return user, nil
 }
 
+// Login выдает пару токенов только после проверки hash, чтобы gateway и другие
+// сервисы работали с JWT, а не с паролем пользователя.
 func (s *AuthService) Login(ctx context.Context, cmd models.LoginCommand) (jwtmanager.Pair, error) {
 	if strings.TrimSpace(cmd.Phone) == "" || cmd.Password == "" {
 		return jwtmanager.Pair{}, apperrors.ErrInvalidArgument
@@ -69,6 +75,8 @@ func (s *AuthService) Login(ctx context.Context, cmd models.LoginCommand) (jwtma
 	return s.tokens.NewPair(user)
 }
 
+// Refresh перевыпускает токены через refresh token, чтобы короткий access token
+// можно было безопасно обновлять без повторной передачи пароля.
 func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (jwtmanager.Pair, error) {
 	if strings.TrimSpace(refreshToken) == "" {
 		return jwtmanager.Pair{}, apperrors.ErrUnauthorized
@@ -87,6 +95,7 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (jwtmana
 	return s.tokens.NewPair(user)
 }
 
+// validateRegister отсекает некорректные учетные данные до обращения к БД и hashing.
 func validateRegister(cmd models.RegisterCommand) error {
 	if strings.TrimSpace(cmd.Phone) == "" || cmd.Password == "" {
 		return apperrors.ErrInvalidArgument
@@ -97,6 +106,7 @@ func validateRegister(cmd models.RegisterCommand) error {
 	return nil
 }
 
+// registerRole ограничивает self-registration безопасными ролями.
 func registerRole(role string) models.Role {
 	switch strings.TrimSpace(role) {
 	case string(models.RoleEmployee):

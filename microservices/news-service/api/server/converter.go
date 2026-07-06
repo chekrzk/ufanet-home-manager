@@ -7,6 +7,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+// newsFilterFromProto отделяет фильтры gRPC-контракта от domain-фильтров ленты.
 func newsFilterFromProto(req *newsv1.ListNewsRequest) models.NewsFilter {
 	return models.NewsFilter{
 		Actor: userContextFromProto(req.GetUser()),
@@ -19,6 +20,7 @@ func newsFilterFromProto(req *newsv1.ListNewsRequest) models.NewsFilter {
 	}
 }
 
+// createNewsCommandFromProto собирает доменную команду публикации из proto.
 func createNewsCommandFromProto(req *newsv1.CreateNewsRequest) models.CreateNewsCommand {
 	return models.CreateNewsCommand{
 		Author:  userContextFromProto(req.GetAuthor()),
@@ -28,6 +30,7 @@ func createNewsCommandFromProto(req *newsv1.CreateNewsRequest) models.CreateNews
 	}
 }
 
+// userContextFromProto переносит trusted auth context между сервисами.
 func userContextFromProto(user *commonv1.UserContext) models.UserContext {
 	if user == nil {
 		return models.UserContext{}
@@ -35,6 +38,7 @@ func userContextFromProto(user *commonv1.UserContext) models.UserContext {
 	return models.UserContext{UserID: user.GetUserId(), Role: user.GetRole()}
 }
 
+// newsToProto возвращает наружу только contract-представление новости.
 func newsToProto(item models.News) *commonv1.News {
 	return &commonv1.News{
 		Id:        item.ID,

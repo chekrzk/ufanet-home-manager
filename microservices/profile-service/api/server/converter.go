@@ -7,6 +7,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+// userContextFromProto переносит auth context в domain без зависимости от proto.
 func userContextFromProto(user *commonv1.UserContext) models.UserContext {
 	if user == nil {
 		return models.UserContext{}
@@ -14,6 +15,7 @@ func userContextFromProto(user *commonv1.UserContext) models.UserContext {
 	return models.UserContext{UserID: user.GetUserId(), Role: user.GetRole()}
 }
 
+// updateProfileCommandFromProto собирает команду изменения профиля из контракта.
 func updateProfileCommandFromProto(req *profilev1.UpdateProfileRequest) models.UpdateProfileCommand {
 	return models.UpdateProfileCommand{
 		Actor:     userContextFromProto(req.GetUser()),
@@ -23,6 +25,7 @@ func updateProfileCommandFromProto(req *profilev1.UpdateProfileRequest) models.U
 	}
 }
 
+// addWorkerCommandFromProto отделяет transport payload от worker domain rules.
 func addWorkerCommandFromProto(req *profilev1.AddWorkerRequest) models.AddWorkerCommand {
 	return models.AddWorkerCommand{
 		Actor:          userContextFromProto(req.GetActor()),
@@ -34,10 +37,12 @@ func addWorkerCommandFromProto(req *profilev1.AddWorkerRequest) models.AddWorker
 	}
 }
 
+// listWorkersFilterFromProto переносит фильтр работников вместе с actor context.
 func listWorkersFilterFromProto(req *profilev1.ListWorkersRequest) models.ListWorkersFilter {
 	return models.ListWorkersFilter{Actor: userContextFromProto(req.GetActor()), HouseID: req.GetHouseId()}
 }
 
+// setWorkerAvailabilityCommandFromProto строит команду публикации расписания.
 func setWorkerAvailabilityCommandFromProto(req *profilev1.SetWorkerAvailabilityRequest) models.SetWorkerAvailabilityCommand {
 	return models.SetWorkerAvailabilityCommand{
 		Worker:         userContextFromProto(req.GetWorker()),
@@ -48,6 +53,7 @@ func setWorkerAvailabilityCommandFromProto(req *profilev1.SetWorkerAvailabilityR
 	}
 }
 
+// listWorkerAvailabilityFilterFromProto собирает доменный фильтр подбора работников.
 func listWorkerAvailabilityFilterFromProto(req *profilev1.ListWorkerAvailabilityRequest) models.ListWorkerAvailabilityFilter {
 	return models.ListWorkerAvailabilityFilter{
 		Actor:          userContextFromProto(req.GetActor()),
@@ -57,10 +63,12 @@ func listWorkerAvailabilityFilterFromProto(req *profilev1.ListWorkerAvailability
 	}
 }
 
+// profileToProto возвращает профиль в общем user-контракте gateway.
 func profileToProto(profile models.Profile, role string) *commonv1.User {
 	return &commonv1.User{Id: profile.UserID, FullName: profile.FullName, Role: role, HouseId: profile.HouseID, Apartment: profile.Apartment}
 }
 
+// workerToProto не раскрывает storage-модель worker за пределы сервиса.
 func workerToProto(worker models.Worker) *commonv1.Worker {
 	return &commonv1.Worker{
 		Id:             worker.ID,
@@ -73,6 +81,7 @@ func workerToProto(worker models.Worker) *commonv1.Worker {
 	}
 }
 
+// availabilityToProto стабилизирует ответ расписания для gateway и frontend.
 func availabilityToProto(item models.WorkerAvailability) *commonv1.WorkerAvailability {
 	return &commonv1.WorkerAvailability{
 		Id:             item.ID,

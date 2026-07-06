@@ -16,10 +16,14 @@ type Service struct {
 	log       zerolog.Logger
 }
 
+// New принимает repository и publisher через интерфейсы, чтобы заявки могли
+// храниться и создавать уведомления без прямой зависимости от transport-кода.
 func New(repo RequestRepository, publisher NotificationPublisher, log zerolog.Logger) *Service {
 	return &Service{repo: repo, publisher: publisher, log: log}
 }
 
+// Create фиксирует заявку от текущего пользователя и сразу создает событие,
+// чтобы заявитель и назначенный работник получили консистентное уведомление.
 func (s *Service) Create(ctx context.Context, cmd models.CreateRequestCommand) (models.MaintenanceRequest, error) {
 	if strings.TrimSpace(cmd.User.UserID) == "" || strings.TrimSpace(cmd.Category) == "" || strings.TrimSpace(cmd.Description) == "" {
 		return models.MaintenanceRequest{}, apperrors.ErrInvalidArgument
@@ -45,6 +49,7 @@ func (s *Service) Create(ctx context.Context, cmd models.CreateRequestCommand) (
 	return request, nil
 }
 
+// List нормализует пагинацию, чтобы список заявок оставался предсказуемым для UI.
 func (s *Service) List(ctx context.Context, filter models.ListRequestsFilter) (models.RequestsPage, error) {
 	items, total, err := s.repo.List(ctx, filter)
 	if err != nil {
@@ -60,6 +65,7 @@ func (s *Service) List(ctx context.Context, filter models.ListRequestsFilter) (m
 	return models.RequestsPage{Items: items, Page: page, Limit: limit, Total: total}, nil
 }
 
+// Get не раскрывает чужие заявки обычному жителю, но оставляет доступ ролям управления.
 func (s *Service) Get(ctx context.Context, cmd models.GetRequestCommand) (models.MaintenanceRequest, error) {
 	request, err := s.repo.FindByID(ctx, cmd.RequestID)
 	if err != nil {
@@ -71,6 +77,8 @@ func (s *Service) Get(ctx context.Context, cmd models.GetRequestCommand) (models
 	return request, nil
 }
 
+// UpdateStatus ведет жизненный цикл заявки и публикует событие, чтобы статус
+// в базе, UI и уведомлениях менялся согласованно.
 func (s *Service) UpdateStatus(ctx context.Context, cmd models.UpdateRequestStatusCommand) (models.MaintenanceRequest, error) {
 	if !canManageRequests(cmd.Actor.Role) || strings.TrimSpace(cmd.Status) == "" {
 		return models.MaintenanceRequest{}, apperrors.ErrForbidden
@@ -101,6 +109,7 @@ func (s *Service) UpdateStatus(ctx context.Context, cmd models.UpdateRequestStat
 	return request, nil
 }
 
+// AddComment сохраняет историю общения по заявке с проверкой доступа владельца.
 func (s *Service) AddComment(ctx context.Context, cmd models.AddRequestCommentCommand) error {
 	if strings.TrimSpace(cmd.Actor.UserID) == "" || strings.TrimSpace(cmd.Text) == "" {
 		return apperrors.ErrInvalidArgument
@@ -119,10 +128,13 @@ func (s *Service) AddComment(ctx context.Context, cmd models.AddRequestCommentCo
 	})
 }
 
+// publish оставляет уведомление о заявке рядом с изменением самой заявки.
 func (s *Service) publish(ctx context.Context, request models.MaintenanceRequest, eventType string, title string, body string) {
 	s.publishTo(ctx, request.UserID, request, eventType, title, body)
 }
 
+// publishTo изолирует best-effort уведомления, чтобы временный сбой notification
+// service не откатывал уже сохраненное изменение заявки.
 func (s *Service) publishTo(ctx context.Context, userID string, request models.MaintenanceRequest, eventType string, title string, body string) {
 	if s.publisher == nil {
 		return
@@ -138,10 +150,12 @@ func (s *Service) publishTo(ctx context.Context, userID string, request models.M
 	}
 }
 
+// canManageRequests фиксирует роли, которым можно менять рабочее состояние заявки.
 func canManageRequests(role string) bool {
 	return role == "admin" || role == "manager" || role == "employee"
 }
 
+// validStatus ограничивает жизненный цикл заявки известными состояниями.
 func validStatus(status string) bool {
 	switch status {
 	case models.RequestStatusNew, models.RequestStatusInProgress, models.RequestStatusDone, models.RequestStatusCanceled:
@@ -151,6 +165,8 @@ func validStatus(status string) bool {
 	}
 }
 
+// assignRequest хранит пустое назначение как NULL, чтобы PostgreSQL uuid-поле
+// не получало некорректную пустую строку.
 func assignRequest(request *models.MaintenanceRequest, assignedTo string) {
 	assignedTo = strings.TrimSpace(assignedTo)
 	if assignedTo == "" {

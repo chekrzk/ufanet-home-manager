@@ -16,10 +16,13 @@ type Server struct {
 	service ProfileService
 }
 
+// New связывает gRPC procedures с profile service interface, чтобы transport
+// не управлял профилями, домами и работниками напрямую.
 func New(service ProfileService) *Server {
 	return &Server{service: service}
 }
 
+// Me получает профиль по auth context из запроса, а не по произвольному id.
 func (s *Server) Me(ctx context.Context, req *profilev1.MeRequest) (*commonv1.User, error) {
 	profile, err := s.service.Me(ctx, userContextFromProto(req.GetUser()))
 	if err != nil {
@@ -28,6 +31,8 @@ func (s *Server) Me(ctx context.Context, req *profilev1.MeRequest) (*commonv1.Us
 	return profileToProto(profile, req.GetUser().GetRole()), nil
 }
 
+// Update переводит proto в команду профиля, чтобы service layer оставался
+// независимым от gRPC-контрактов.
 func (s *Server) Update(ctx context.Context, req *profilev1.UpdateProfileRequest) (*commonv1.User, error) {
 	profile, err := s.service.Update(ctx, updateProfileCommandFromProto(req))
 	if err != nil {
@@ -36,6 +41,7 @@ func (s *Server) Update(ctx context.Context, req *profilev1.UpdateProfileRequest
 	return profileToProto(profile, req.GetUser().GetRole()), nil
 }
 
+// AddWorker оставляет административные правила работника в profile service.
 func (s *Server) AddWorker(ctx context.Context, req *profilev1.AddWorkerRequest) (*commonv1.Worker, error) {
 	worker, err := s.service.AddWorker(ctx, addWorkerCommandFromProto(req))
 	if err != nil {
@@ -44,6 +50,8 @@ func (s *Server) AddWorker(ctx context.Context, req *profilev1.AddWorkerRequest)
 	return workerToProto(worker), nil
 }
 
+// ListWorkers возвращает работников через service layer, чтобы применялись
+// ограничения роли и дома управляющего.
 func (s *Server) ListWorkers(ctx context.Context, req *profilev1.ListWorkersRequest) (*profilev1.ListWorkersResponse, error) {
 	workers, err := s.service.ListWorkers(ctx, listWorkersFilterFromProto(req))
 	if err != nil {
@@ -56,6 +64,7 @@ func (s *Server) ListWorkers(ctx context.Context, req *profilev1.ListWorkersRequ
 	return &profilev1.ListWorkersResponse{Items: items}, nil
 }
 
+// SetWorkerAvailability публикует расписание через доменную команду работника.
 func (s *Server) SetWorkerAvailability(ctx context.Context, req *profilev1.SetWorkerAvailabilityRequest) (*commonv1.WorkerAvailability, error) {
 	availability, err := s.service.SetWorkerAvailability(ctx, setWorkerAvailabilityCommandFromProto(req))
 	if err != nil {
@@ -64,6 +73,7 @@ func (s *Server) SetWorkerAvailability(ctx context.Context, req *profilev1.SetWo
 	return availabilityToProto(availability), nil
 }
 
+// ListWorkerAvailability конвертирует фильтры подбора работников в domain-модель.
 func (s *Server) ListWorkerAvailability(ctx context.Context, req *profilev1.ListWorkerAvailabilityRequest) (*profilev1.ListWorkerAvailabilityResponse, error) {
 	items, err := s.service.ListWorkerAvailability(ctx, listWorkerAvailabilityFilterFromProto(req))
 	if err != nil {
@@ -76,6 +86,7 @@ func (s *Server) ListWorkerAvailability(ctx context.Context, req *profilev1.List
 	return &profilev1.ListWorkerAvailabilityResponse{Items: respItems}, nil
 }
 
+// grpcError сохраняет единое отображение profile domain errors в gRPC status.
 func grpcError(err error) error {
 	switch {
 	case stderrors.Is(err, apperrors.ErrInvalidArgument):

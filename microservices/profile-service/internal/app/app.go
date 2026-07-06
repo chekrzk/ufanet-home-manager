@@ -16,6 +16,8 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Run поднимает profile-service после миграций, чтобы профили и работники
+// имели готовую схему до первого gRPC-запроса.
 func Run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
