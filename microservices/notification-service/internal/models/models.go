@@ -17,14 +17,14 @@ type Device struct {
 }
 
 type Notification struct {
-	ID        string `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	UserID    string `gorm:"type:uuid;index"`
-	HouseID   string `gorm:"size:64;index"`
-	Type      string `gorm:"size:64;not null;index"`
-	Title     string `gorm:"size:255;not null"`
-	Body      string `gorm:"not null"`
-	EntityID  string `gorm:"size:64;index"`
-	Read      bool   `gorm:"not null;default:false"`
+	ID        string  `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	UserID    *string `gorm:"type:uuid;index"`
+	HouseID   string  `gorm:"size:64;index"`
+	Type      string  `gorm:"size:64;not null;index"`
+	Title     string  `gorm:"size:255;not null"`
+	Body      string  `gorm:"not null"`
+	EntityID  string  `gorm:"size:64;index"`
+	Read      bool    `gorm:"not null;default:false"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

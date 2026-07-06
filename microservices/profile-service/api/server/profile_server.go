@@ -7,10 +7,8 @@ import (
 	commonv1 "github.com/chekrzk/ufanet-home-manager/contracts/gen/go/common/v1"
 	profilev1 "github.com/chekrzk/ufanet-home-manager/contracts/gen/go/profile/v1"
 	apperrors "github.com/chekrzk/ufanet-home-manager/profile-service/internal/errors"
-	"github.com/chekrzk/ufanet-home-manager/profile-service/internal/models"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type Server struct {
@@ -23,7 +21,7 @@ func New(service ProfileService) *Server {
 }
 
 func (s *Server) Me(ctx context.Context, req *profilev1.MeRequest) (*commonv1.User, error) {
-	profile, err := s.service.Me(ctx, userContext(req.GetUser()))
+	profile, err := s.service.Me(ctx, userContextFromProto(req.GetUser()))
 	if err != nil {
 		return nil, grpcError(err)
 	}
@@ -31,12 +29,7 @@ func (s *Server) Me(ctx context.Context, req *profilev1.MeRequest) (*commonv1.Us
 }
 
 func (s *Server) Update(ctx context.Context, req *profilev1.UpdateProfileRequest) (*commonv1.User, error) {
-	profile, err := s.service.Update(ctx, models.UpdateProfileCommand{
-		Actor:     userContext(req.GetUser()),
-		FullName:  req.GetFullName(),
-		HouseID:   req.GetHouseId(),
-		Apartment: req.GetApartment(),
-	})
+	profile, err := s.service.Update(ctx, updateProfileCommandFromProto(req))
 	if err != nil {
 		return nil, grpcError(err)
 	}
@@ -44,14 +37,7 @@ func (s *Server) Update(ctx context.Context, req *profilev1.UpdateProfileRequest
 }
 
 func (s *Server) AddWorker(ctx context.Context, req *profilev1.AddWorkerRequest) (*commonv1.Worker, error) {
-	worker, err := s.service.AddWorker(ctx, models.AddWorkerCommand{
-		Actor:          userContext(req.GetActor()),
-		UserID:         req.GetUserId(),
-		FullName:       req.GetFullName(),
-		Specialization: req.GetSpecialization(),
-		Phone:          req.GetPhone(),
-		HouseID:        req.GetHouseId(),
-	})
+	worker, err := s.service.AddWorker(ctx, addWorkerCommandFromProto(req))
 	if err != nil {
 		return nil, grpcError(err)
 	}
@@ -59,7 +45,7 @@ func (s *Server) AddWorker(ctx context.Context, req *profilev1.AddWorkerRequest)
 }
 
 func (s *Server) ListWorkers(ctx context.Context, req *profilev1.ListWorkersRequest) (*profilev1.ListWorkersResponse, error) {
-	workers, err := s.service.ListWorkers(ctx, models.ListWorkersFilter{Actor: userContext(req.GetActor()), HouseID: req.GetHouseId()})
+	workers, err := s.service.ListWorkers(ctx, listWorkersFilterFromProto(req))
 	if err != nil {
 		return nil, grpcError(err)
 	}
@@ -71,13 +57,7 @@ func (s *Server) ListWorkers(ctx context.Context, req *profilev1.ListWorkersRequ
 }
 
 func (s *Server) SetWorkerAvailability(ctx context.Context, req *profilev1.SetWorkerAvailabilityRequest) (*commonv1.WorkerAvailability, error) {
-	availability, err := s.service.SetWorkerAvailability(ctx, models.SetWorkerAvailabilityCommand{
-		Worker:        userContext(req.GetWorker()),
-		Specialization: req.GetSpecialization(),
-		HouseID:       req.GetHouseId(),
-		AvailableDate: req.GetAvailableDate(),
-		AvailableTime: req.GetAvailableTime(),
-	})
+	availability, err := s.service.SetWorkerAvailability(ctx, setWorkerAvailabilityCommandFromProto(req))
 	if err != nil {
 		return nil, grpcError(err)
 	}
@@ -85,12 +65,7 @@ func (s *Server) SetWorkerAvailability(ctx context.Context, req *profilev1.SetWo
 }
 
 func (s *Server) ListWorkerAvailability(ctx context.Context, req *profilev1.ListWorkerAvailabilityRequest) (*profilev1.ListWorkerAvailabilityResponse, error) {
-	items, err := s.service.ListWorkerAvailability(ctx, models.ListWorkerAvailabilityFilter{
-		Actor:          userContext(req.GetActor()),
-		Specialization: req.GetSpecialization(),
-		HouseID:        req.GetHouseId(),
-		AvailableDate:  req.GetAvailableDate(),
-	})
+	items, err := s.service.ListWorkerAvailability(ctx, listWorkerAvailabilityFilterFromProto(req))
 	if err != nil {
 		return nil, grpcError(err)
 	}
@@ -99,42 +74,6 @@ func (s *Server) ListWorkerAvailability(ctx context.Context, req *profilev1.List
 		respItems = append(respItems, availabilityToProto(item))
 	}
 	return &profilev1.ListWorkerAvailabilityResponse{Items: respItems}, nil
-}
-
-func userContext(user *commonv1.UserContext) models.UserContext {
-	if user == nil {
-		return models.UserContext{}
-	}
-	return models.UserContext{UserID: user.GetUserId(), Role: user.GetRole()}
-}
-
-func profileToProto(profile models.Profile, role string) *commonv1.User {
-	return &commonv1.User{Id: profile.UserID, FullName: profile.FullName, Role: role, HouseId: profile.HouseID, Apartment: profile.Apartment}
-}
-
-func workerToProto(worker models.Worker) *commonv1.Worker {
-	return &commonv1.Worker{
-		Id:             worker.ID,
-		UserId:         worker.UserID,
-		FullName:       worker.FullName,
-		Specialization: worker.Specialization,
-		Phone:          worker.Phone,
-		HouseId:        worker.HouseID,
-		CreatedAt:      timestamppb.New(worker.CreatedAt),
-	}
-}
-
-func availabilityToProto(item models.WorkerAvailability) *commonv1.WorkerAvailability {
-	return &commonv1.WorkerAvailability{
-		Id:             item.ID,
-		WorkerId:       item.WorkerID,
-		UserId:         item.UserID,
-		Specialization: item.Specialization,
-		HouseId:        item.HouseID,
-		AvailableDate:  item.AvailableDate,
-		AvailableTime:  item.AvailableTime,
-		CreatedAt:      timestamppb.New(item.CreatedAt),
-	}
 }
 
 func grpcError(err error) error {

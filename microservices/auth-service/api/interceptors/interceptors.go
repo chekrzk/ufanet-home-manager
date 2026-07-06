@@ -5,6 +5,7 @@ import (
 	"runtime/debug"
 	"time"
 
+	authv1 "github.com/chekrzk/ufanet-home-manager/contracts/gen/go/auth/v1"
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -28,6 +29,18 @@ func Unary(log zerolog.Logger) grpc.UnaryServerInterceptor {
 				Dur("duration", time.Since(start)).
 				Msg("grpc request")
 		}()
+		if err := authorize(req); err != nil {
+			return nil, err
+		}
 		return handler(ctx, req)
+	}
+}
+
+func authorize(req any) error {
+	switch req.(type) {
+	case *authv1.LoginRequest, *authv1.RegisterRequest, *authv1.RefreshRequest:
+		return nil
+	default:
+		return status.Error(codes.PermissionDenied, "access denied")
 	}
 }

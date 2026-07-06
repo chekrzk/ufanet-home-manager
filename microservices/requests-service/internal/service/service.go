@@ -29,18 +29,18 @@ func (s *Service) Create(ctx context.Context, cmd models.CreateRequestCommand) (
 		Category:      strings.TrimSpace(cmd.Category),
 		Description:   strings.TrimSpace(cmd.Description),
 		Status:        models.RequestStatusNew,
-		AssignedTo:    strings.TrimSpace(cmd.AssignedWorkerID),
 		PreferredDate: strings.TrimSpace(cmd.PreferredDate),
 		Address:       strings.TrimSpace(cmd.Address),
 		Apartment:     strings.TrimSpace(cmd.Apartment),
 		Phone:         strings.TrimSpace(cmd.Phone),
 	}
+	assignRequest(&request, cmd.AssignedWorkerID)
 	if err := s.repo.Create(ctx, &request); err != nil {
 		return models.MaintenanceRequest{}, err
 	}
 	s.publishTo(ctx, request.UserID, request, "request.created", "New request created", "Request status: "+request.Status)
-	if request.AssignedTo != "" {
-		s.publishTo(ctx, request.AssignedTo, request, "request.assigned", "New request assigned", request.Description)
+	if request.AssignedTo != nil {
+		s.publishTo(ctx, *request.AssignedTo, request, "request.assigned", "New request assigned", request.Description)
 	}
 	return request, nil
 }
@@ -85,7 +85,7 @@ func (s *Service) UpdateStatus(ctx context.Context, cmd models.UpdateRequestStat
 	}
 	now := time.Now()
 	request.Status = status
-	request.AssignedTo = strings.TrimSpace(cmd.AssignedTo)
+	assignRequest(&request, cmd.AssignedTo)
 	switch status {
 	case models.RequestStatusInProgress:
 		request.AcceptedAt = &now
@@ -149,4 +149,13 @@ func validStatus(status string) bool {
 	default:
 		return false
 	}
+}
+
+func assignRequest(request *models.MaintenanceRequest, assignedTo string) {
+	assignedTo = strings.TrimSpace(assignedTo)
+	if assignedTo == "" {
+		request.AssignedTo = nil
+		return
+	}
+	request.AssignedTo = &assignedTo
 }

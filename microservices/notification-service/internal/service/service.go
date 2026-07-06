@@ -41,13 +41,16 @@ func (s *Service) Publish(ctx context.Context, cmd models.PublishNotificationCom
 	if strings.TrimSpace(cmd.Type) == "" || strings.TrimSpace(cmd.Title) == "" {
 		return apperrors.ErrInvalidArgument
 	}
+	userID := strings.TrimSpace(cmd.UserID)
 	notification := models.Notification{
-		UserID:   strings.TrimSpace(cmd.UserID),
 		HouseID:  strings.TrimSpace(cmd.HouseID),
 		Type:     strings.TrimSpace(cmd.Type),
 		Title:    strings.TrimSpace(cmd.Title),
 		Body:     strings.TrimSpace(cmd.Body),
 		EntityID: strings.TrimSpace(cmd.EntityID),
+	}
+	if userID != "" {
+		notification.UserID = &userID
 	}
 	if err := s.devices.CreateNotification(ctx, &notification); err != nil {
 		return err

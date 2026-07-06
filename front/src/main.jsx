@@ -86,6 +86,7 @@ function App() {
       setNews(newsPage?.items || [])
       setRequests(requestsPage?.items || [])
       setNotifications(notificationsPage?.items || [])
+      clearError()
     } catch (err) {
       setMessage({ type: 'error', text: err.message })
     }
@@ -100,9 +101,14 @@ function App() {
       ])
       setWorkers(workerItems || [])
       setAvailability(availabilityItems || [])
+      clearError()
     } catch (err) {
       setMessage({ type: 'error', text: err.message })
     }
+  }
+
+  function clearError() {
+    setMessage((current) => current?.type === 'error' ? null : current)
   }
 
   useEffect(() => {
@@ -145,8 +151,13 @@ function App() {
   }
 
   async function refreshNotifications() {
-    const page = await api('/notifications?page=1&limit=30')
-    setNotifications(page?.items || [])
+    try {
+      const page = await api('/notifications?page=1&limit=30')
+      setNotifications(page?.items || [])
+      clearError()
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message })
+    }
   }
 
   async function markRead(id) {

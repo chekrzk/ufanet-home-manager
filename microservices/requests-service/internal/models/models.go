@@ -20,16 +20,16 @@ type Pagination struct {
 }
 
 type MaintenanceRequest struct {
-	ID            string `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	UserID        string `gorm:"type:uuid;index;not null"`
-	Category      string `gorm:"size:64;index;not null"`
-	Description   string `gorm:"not null"`
-	Status        string `gorm:"size:32;index;not null"`
-	AssignedTo    string `gorm:"type:uuid;index"`
-	PreferredDate string `gorm:"size:32;index"`
-	Address       string `gorm:"size:255"`
-	Apartment     string `gorm:"size:32"`
-	Phone         string `gorm:"size:32"`
+	ID            string  `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	UserID        string  `gorm:"type:uuid;index;not null"`
+	Category      string  `gorm:"size:64;index;not null"`
+	Description   string  `gorm:"not null"`
+	Status        string  `gorm:"size:32;index;not null"`
+	AssignedTo    *string `gorm:"type:uuid;index"`
+	PreferredDate string  `gorm:"size:32;index"`
+	Address       string  `gorm:"size:255"`
+	Apartment     string  `gorm:"size:32"`
+	Phone         string  `gorm:"size:32"`
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	AcceptedAt    *time.Time
