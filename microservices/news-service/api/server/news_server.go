@@ -7,10 +7,8 @@ import (
 	commonv1 "github.com/chekrzk/ufanet-home-manager/contracts/gen/go/common/v1"
 	newsv1 "github.com/chekrzk/ufanet-home-manager/contracts/gen/go/news/v1"
 	apperrors "github.com/chekrzk/ufanet-home-manager/news-service/internal/errors"
-	"github.com/chekrzk/ufanet-home-manager/news-service/internal/models"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type Server struct {
@@ -18,20 +16,16 @@ type Server struct {
 	service NewsService
 }
 
+// New связывает gRPC endpoint с интерфейсом сценариев новостей, чтобы transport
+// не зависел от repository и notification client.
 func New(service NewsService) *Server {
 	return &Server{service: service}
 }
 
+// ListNews конвертирует proto-фильтр в доменную модель, чтобы service layer
+// отвечал за правила ленты, а не за формат контракта.
 func (s *Server) ListNews(ctx context.Context, req *newsv1.ListNewsRequest) (*newsv1.ListNewsResponse, error) {
-	page, err := s.service.List(ctx, models.NewsFilter{
-		Actor: userContext(req.GetUser()),
-		Pagination: models.Pagination{
-			Page:  int(req.GetPagination().GetPage()),
-			Limit: int(req.GetPagination().GetLimit()),
-		},
-		DateFrom: req.GetDateFrom(),
-		DateTo:   req.GetDateTo(),
-	})
+	page, err := s.service.List(ctx, newsFilterFromProto(req))
 	if err != nil {
 		return nil, grpcError(err)
 	}
@@ -42,36 +36,17 @@ func (s *Server) ListNews(ctx context.Context, req *newsv1.ListNewsRequest) (*ne
 	return &newsv1.ListNewsResponse{Items: items, Page: int32(page.Page), Limit: int32(page.Limit), Total: int32(page.Total)}, nil
 }
 
+// CreateNews оставляет публикацию и side effects сервисному слою, а server
+// только связывает gRPC request/response с доменной командой.
 func (s *Server) CreateNews(ctx context.Context, req *newsv1.CreateNewsRequest) (*commonv1.News, error) {
-	item, err := s.service.Create(ctx, models.CreateNewsCommand{
-		Author:  userContext(req.GetAuthor()),
-		Title:   req.GetTitle(),
-		Body:    req.GetBody(),
-		HouseID: req.GetHouseId(),
-	})
+	item, err := s.service.Create(ctx, createNewsCommandFromProto(req))
 	if err != nil {
 		return nil, grpcError(err)
 	}
 	return newsToProto(item), nil
 }
 
-func userContext(user *commonv1.UserContext) models.UserContext {
-	if user == nil {
-		return models.UserContext{}
-	}
-	return models.UserContext{UserID: user.GetUserId(), Role: user.GetRole()}
-}
-
-func newsToProto(item models.News) *commonv1.News {
-	return &commonv1.News{
-		Id:        item.ID,
-		Title:     item.Title,
-		Body:      item.Body,
-		HouseId:   item.HouseID,
-		CreatedAt: timestamppb.New(item.CreatedAt),
-	}
-}
-
+// grpcError сохраняет единый контракт ошибок между news-service и gateway.
 func grpcError(err error) error {
 	switch {
 	case stderrors.Is(err, apperrors.ErrInvalidArgument):

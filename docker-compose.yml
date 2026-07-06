@@ -180,6 +180,17 @@
       profile-service:
         condition: service_started
 
+  front:
+    build:
+      context: .
+      dockerfile: front/Dockerfile
+    container_name: front
+    ports:
+      - "5173:80"
+    depends_on:
+      api-gateway:
+        condition: service_started
+
 volumes:
   postgres_data:
   redis_data:

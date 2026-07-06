@@ -7,10 +7,8 @@ import (
 	commonv1 "github.com/chekrzk/ufanet-home-manager/contracts/gen/go/common/v1"
 	profilev1 "github.com/chekrzk/ufanet-home-manager/contracts/gen/go/profile/v1"
 	apperrors "github.com/chekrzk/ufanet-home-manager/profile-service/internal/errors"
-	"github.com/chekrzk/ufanet-home-manager/profile-service/internal/models"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type Server struct {
@@ -18,48 +16,44 @@ type Server struct {
 	service ProfileService
 }
 
+// New связывает gRPC procedures с profile service interface, чтобы transport
+// не управлял профилями, домами и работниками напрямую.
 func New(service ProfileService) *Server {
 	return &Server{service: service}
 }
 
+// Me получает профиль по auth context из запроса, а не по произвольному id.
 func (s *Server) Me(ctx context.Context, req *profilev1.MeRequest) (*commonv1.User, error) {
-	profile, err := s.service.Me(ctx, userContext(req.GetUser()))
+	profile, err := s.service.Me(ctx, userContextFromProto(req.GetUser()))
 	if err != nil {
 		return nil, grpcError(err)
 	}
 	return profileToProto(profile, req.GetUser().GetRole()), nil
 }
 
+// Update переводит proto в команду профиля, чтобы service layer оставался
+// независимым от gRPC-контрактов.
 func (s *Server) Update(ctx context.Context, req *profilev1.UpdateProfileRequest) (*commonv1.User, error) {
-	profile, err := s.service.Update(ctx, models.UpdateProfileCommand{
-		Actor:     userContext(req.GetUser()),
-		FullName:  req.GetFullName(),
-		HouseID:   req.GetHouseId(),
-		Apartment: req.GetApartment(),
-	})
+	profile, err := s.service.Update(ctx, updateProfileCommandFromProto(req))
 	if err != nil {
 		return nil, grpcError(err)
 	}
 	return profileToProto(profile, req.GetUser().GetRole()), nil
 }
 
+// AddWorker оставляет административные правила работника в profile service.
 func (s *Server) AddWorker(ctx context.Context, req *profilev1.AddWorkerRequest) (*commonv1.Worker, error) {
-	worker, err := s.service.AddWorker(ctx, models.AddWorkerCommand{
-		Actor:          userContext(req.GetActor()),
-		UserID:         req.GetUserId(),
-		FullName:       req.GetFullName(),
-		Specialization: req.GetSpecialization(),
-		Phone:          req.GetPhone(),
-		HouseID:        req.GetHouseId(),
-	})
+	worker, err := s.service.AddWorker(ctx, addWorkerCommandFromProto(req))
 	if err != nil {
 		return nil, grpcError(err)
 	}
 	return workerToProto(worker), nil
 }
 
+// ListWorkers возвращает работников через service layer, чтобы применялись
+// ограничения роли и дома управляющего.
 func (s *Server) ListWorkers(ctx context.Context, req *profilev1.ListWorkersRequest) (*profilev1.ListWorkersResponse, error) {
-	workers, err := s.service.ListWorkers(ctx, models.ListWorkersFilter{Actor: userContext(req.GetActor()), HouseID: req.GetHouseId()})
+	workers, err := s.service.ListWorkers(ctx, listWorkersFilterFromProto(req))
 	if err != nil {
 		return nil, grpcError(err)
 	}
@@ -70,27 +64,18 @@ func (s *Server) ListWorkers(ctx context.Context, req *profilev1.ListWorkersRequ
 	return &profilev1.ListWorkersResponse{Items: items}, nil
 }
 
+// SetWorkerAvailability публикует расписание через доменную команду работника.
 func (s *Server) SetWorkerAvailability(ctx context.Context, req *profilev1.SetWorkerAvailabilityRequest) (*commonv1.WorkerAvailability, error) {
-	availability, err := s.service.SetWorkerAvailability(ctx, models.SetWorkerAvailabilityCommand{
-		Worker:        userContext(req.GetWorker()),
-		Specialization: req.GetSpecialization(),
-		HouseID:       req.GetHouseId(),
-		AvailableDate: req.GetAvailableDate(),
-		AvailableTime: req.GetAvailableTime(),
-	})
+	availability, err := s.service.SetWorkerAvailability(ctx, setWorkerAvailabilityCommandFromProto(req))
 	if err != nil {
 		return nil, grpcError(err)
 	}
 	return availabilityToProto(availability), nil
 }
 
+// ListWorkerAvailability конвертирует фильтры подбора работников в domain-модель.
 func (s *Server) ListWorkerAvailability(ctx context.Context, req *profilev1.ListWorkerAvailabilityRequest) (*profilev1.ListWorkerAvailabilityResponse, error) {
-	items, err := s.service.ListWorkerAvailability(ctx, models.ListWorkerAvailabilityFilter{
-		Actor:          userContext(req.GetActor()),
-		Specialization: req.GetSpecialization(),
-		HouseID:        req.GetHouseId(),
-		AvailableDate:  req.GetAvailableDate(),
-	})
+	items, err := s.service.ListWorkerAvailability(ctx, listWorkerAvailabilityFilterFromProto(req))
 	if err != nil {
 		return nil, grpcError(err)
 	}
@@ -101,42 +86,7 @@ func (s *Server) ListWorkerAvailability(ctx context.Context, req *profilev1.List
 	return &profilev1.ListWorkerAvailabilityResponse{Items: respItems}, nil
 }
 
-func userContext(user *commonv1.UserContext) models.UserContext {
-	if user == nil {
-		return models.UserContext{}
-	}
-	return models.UserContext{UserID: user.GetUserId(), Role: user.GetRole()}
-}
-
-func profileToProto(profile models.Profile, role string) *commonv1.User {
-	return &commonv1.User{Id: profile.UserID, FullName: profile.FullName, Role: role, HouseId: profile.HouseID, Apartment: profile.Apartment}
-}
-
-func workerToProto(worker models.Worker) *commonv1.Worker {
-	return &commonv1.Worker{
-		Id:             worker.ID,
-		UserId:         worker.UserID,
-		FullName:       worker.FullName,
-		Specialization: worker.Specialization,
-		Phone:          worker.Phone,
-		HouseId:        worker.HouseID,
-		CreatedAt:      timestamppb.New(worker.CreatedAt),
-	}
-}
-
-func availabilityToProto(item models.WorkerAvailability) *commonv1.WorkerAvailability {
-	return &commonv1.WorkerAvailability{
-		Id:             item.ID,
-		WorkerId:       item.WorkerID,
-		UserId:         item.UserID,
-		Specialization: item.Specialization,
-		HouseId:        item.HouseID,
-		AvailableDate:  item.AvailableDate,
-		AvailableTime:  item.AvailableTime,
-		CreatedAt:      timestamppb.New(item.CreatedAt),
-	}
-}
-
+// grpcError сохраняет единое отображение profile domain errors в gRPC status.
 func grpcError(err error) error {
 	switch {
 	case stderrors.Is(err, apperrors.ErrInvalidArgument):

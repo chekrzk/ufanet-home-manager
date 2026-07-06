@@ -15,10 +15,14 @@ type Service struct {
 	log       zerolog.Logger
 }
 
+// New принимает repo и publisher через интерфейсы, чтобы новости сохранялись
+// отдельно от способа уведомления жителей.
 func New(repo NewsRepository, publisher NotificationPublisher, log zerolog.Logger) *Service {
 	return &Service{repo: repo, publisher: publisher, log: log}
 }
 
+// List возвращает страницу новостей с нормализованной пагинацией, чтобы клиенты
+// не могли случайно запросить неограниченную ленту.
 func (s *Service) List(ctx context.Context, filter models.NewsFilter) (models.NewsPage, error) {
 	items, total, err := s.repo.List(ctx, filter)
 	if err != nil {
@@ -34,6 +38,8 @@ func (s *Service) List(ctx context.Context, filter models.NewsFilter) (models.Ne
 	return models.NewsPage{Items: items, Page: page, Limit: limit, Total: total}, nil
 }
 
+// Create проверяет административный сценарий публикации и после сохранения
+// инициирует уведомление, чтобы лента и события не расходились.
 func (s *Service) Create(ctx context.Context, cmd models.CreateNewsCommand) (models.News, error) {
 	if !canManageNews(cmd.Author.Role) {
 		return models.News{}, apperrors.ErrForbidden
@@ -65,6 +71,7 @@ func (s *Service) Create(ctx context.Context, cmd models.CreateNewsCommand) (mod
 	return item, nil
 }
 
+// canManageNews фиксирует роли, которым доверено публиковать новости.
 func canManageNews(role string) bool {
 	return role == "admin" || role == "manager"
 }

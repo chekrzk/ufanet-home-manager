@@ -22,6 +22,8 @@ type Middlewares struct {
 	blacklist *Blacklist
 }
 
+// New хранит общие зависимости middleware вместе, чтобы router подключал
+// политики безопасности без знания env и logger.
 func New(cfg *config.Config, log zerolog.Logger) *Middlewares {
 	return &Middlewares{
 		cfg:       cfg,
@@ -30,6 +32,7 @@ func New(cfg *config.Config, log zerolog.Logger) *Middlewares {
 	}
 }
 
+// Logger дает единый audit trail по HTTP-запросам gateway.
 func (m *Middlewares) Logger() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		start := time.Now()
@@ -47,6 +50,7 @@ func (m *Middlewares) Logger() fiber.Handler {
 	}
 }
 
+// CORS явно разрешает frontend-origin, чтобы браузер мог безопасно дергать API.
 func (m *Middlewares) CORS() fiber.Handler {
 	return cors.New(cors.Config{
 		AllowOrigins: m.cfg.CORS.AllowedOrigins,
@@ -55,6 +59,7 @@ func (m *Middlewares) CORS() fiber.Handler {
 	})
 }
 
+// RateLimit снижает риск грубого перебора и случайной перегрузки gateway.
 func (m *Middlewares) RateLimit() fiber.Handler {
 	return limiter.New(limiter.Config{
 		Max:        m.cfg.RateLimit.Max,
@@ -65,6 +70,7 @@ func (m *Middlewares) RateLimit() fiber.Handler {
 	})
 }
 
+// Blacklist отсекает токены, которые уже нельзя принимать до истечения JWT.
 func (m *Middlewares) Blacklist() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		token := bearerToken(c)
@@ -76,6 +82,7 @@ func (m *Middlewares) Blacklist() fiber.Handler {
 	}
 }
 
+// JWT превращает Bearer token в auth context для handlers и downstream-сервисов.
 func (m *Middlewares) JWT() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		token := bearerToken(c)
@@ -96,6 +103,7 @@ func (m *Middlewares) JWT() fiber.Handler {
 	}
 }
 
+// Role оставляет endpoint-level доступ декларативным в router.
 func (m *Middlewares) Role(roles ...string) fiber.Handler {
 	allowed := make(map[string]struct{}, len(roles))
 	for _, role := range roles {
@@ -116,16 +124,19 @@ type Blacklist struct {
 	tokens map[string]time.Time
 }
 
+// NewBlacklist создает in-memory denylist для локального lifecycle gateway.
 func NewBlacklist() *Blacklist {
 	return &Blacklist{tokens: make(map[string]time.Time)}
 }
 
+// Add хранит token только до его JWT-expiration, чтобы denylist не рос бесконечно.
 func (b *Blacklist) Add(token string, expiresAt time.Time) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	b.tokens[token] = expiresAt
 }
 
+// Contains одновременно проверяет token и чистит истекшие записи.
 func (b *Blacklist) Contains(token string) bool {
 	b.mu.RLock()
 	expiresAt, ok := b.tokens[token]
@@ -142,6 +153,7 @@ func (b *Blacklist) Contains(token string) bool {
 	return true
 }
 
+// bearerToken изолирует формат Authorization header от JWT middleware.
 func bearerToken(c *fiber.Ctx) string {
 	header := c.Get(fiber.HeaderAuthorization)
 	if header == "" {
@@ -159,6 +171,7 @@ type jwtClaims struct {
 	jwt.RegisteredClaims
 }
 
+// parseJWT проверяет подпись и claims до попадания user_id/role в request context.
 func parseJWT(token string, secret string) (jwtClaims, error) {
 	var claims jwtClaims
 

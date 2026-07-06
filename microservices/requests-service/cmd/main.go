@@ -1,70 +1,24 @@
 package main
 
 import (
-	"context"
-	"net"
-	"os/signal"
-	"syscall"
-	"time"
+	"log"
 
-	requestsv1 "github.com/chekrzk/ufanet-home-manager/contracts/gen/go/requests/v1"
-	"github.com/chekrzk/ufanet-home-manager/requests-service/api/interceptors"
-	requestsserver "github.com/chekrzk/ufanet-home-manager/requests-service/api/server"
-	notificationclient "github.com/chekrzk/ufanet-home-manager/requests-service/infra/clients/notification_client"
-	"github.com/chekrzk/ufanet-home-manager/requests-service/internal/repository"
-	"github.com/chekrzk/ufanet-home-manager/requests-service/internal/service"
-	"github.com/chekrzk/ufanet-home-manager/requests-service/resources/config"
-	"github.com/chekrzk/ufanet-home-manager/requests-service/resources/logger"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"github.com/chekrzk/ufanet-home-manager/requests-service/internal/app"
 )
 
 func main() {
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	defer stop()
-
-	cfg, err := config.Load()
-	if err != nil {
-		panic(err)
-	}
-	log := logger.New(cfg)
-
-	db, err := gorm.Open(postgres.Open(cfg.DB.DSN), &gorm.Config{})
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to connect database")
-	}
-	repo := repository.NewRequestRepository(db)
-	migrationCtx, cancel := context.WithTimeout(ctx, 15*time.Second)
-	defer cancel()
-	if err := repo.Migrate(migrationCtx); err != nil {
-		log.Fatal().Err(err).Msg("failed to migrate database")
+	if err := app.Run(); err != nil {
+		log.Fatal(err)
 	}
 
-	notificationsConn, err := grpc.NewClient(cfg.Service.NotificationsAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to connect notifications service")
-	}
-	defer notificationsConn.Close()
-
-	listener, err := net.Listen("tcp", cfg.GRPC.Addr())
-	if err != nil {
-		log.Fatal().Err(err).Str("addr", cfg.GRPC.Addr()).Msg("failed to listen")
-	}
-	requestsService := service.New(repo, notificationclient.New(notificationsConn), log)
-	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(interceptors.Unary(log)))
-	requestsv1.RegisterRequestsServiceServer(grpcServer, requestsserver.New(requestsService))
-
-	go func() {
-		log.Info().Str("addr", cfg.GRPC.Addr()).Msg("starting requests-service")
-		if err := grpcServer.Serve(listener); err != nil {
-			log.Error().Err(err).Msg("grpc server stopped")
-			stop()
-		}
-	}()
-
-	<-ctx.Done()
-	log.Info().Msg("stopping requests-service")
-	grpcServer.GracefulStop()
+	// Структура requests-service:
+	// cmd - минимальная точка запуска сервиса.
+	// api/interceptors - gRPC middleware для логирования и zero-trust role checks.
+	// api/server - gRPC procedures и конвертация proto-запросов в service commands.
+	// infra/clients - исходящие клиенты к другим микросервисам, например notifications.
+	// internal/app - сборка resources, repository, service layer и gRPC server.
+	// internal/service - бизнес-сценарии заявок: создание, статусы, комментарии.
+	// internal/repository - GORM-доступ к maintenance_requests/comments и миграции.
+	// internal/models - доменные модели заявок, команд, статусов и pagination.
+	// resources - env config, logger, DB, gRPC connections и их lifecycle.
 }

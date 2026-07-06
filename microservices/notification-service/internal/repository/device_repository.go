@@ -36,7 +36,7 @@ func (r *DeviceRepository) CreateNotification(ctx context.Context, notification 
 
 func (r *DeviceRepository) ListNotifications(ctx context.Context, command models.ListNotificationsCommand) ([]models.Notification, int64, error) {
 	page, limit := normalizePagination(command.Pagination)
-	query := r.db.WithContext(ctx).Model(&models.Notification{}).Where("user_id = ? OR user_id = ''", command.User.UserID)
+	query := r.db.WithContext(ctx).Model(&models.Notification{}).Where("user_id = ? OR user_id IS NULL", command.User.UserID)
 
 	var total int64
 	if err := query.Count(&total).Error; err != nil {
@@ -51,7 +51,7 @@ func (r *DeviceRepository) ListNotifications(ctx context.Context, command models
 func (r *DeviceRepository) MarkRead(ctx context.Context, userID string, notificationID string) error {
 	return r.db.WithContext(ctx).
 		Model(&models.Notification{}).
-		Where("id = ? AND (user_id = ? OR user_id = '')", notificationID, userID).
+		Where("id = ? AND (user_id = ? OR user_id IS NULL)", notificationID, userID).
 		Update("read", true).Error
 }
 

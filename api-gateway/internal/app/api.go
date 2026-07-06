@@ -6,6 +6,8 @@ import (
 	"github.com/chekrzk/ufanet-home-manager/api-gateway/internal/router"
 )
 
+// Run собирает gateway в одном месте, чтобы main оставался точкой запуска,
+// а детали конфигурации, DI и HTTP-сервера не протекали наружу.
 func Run() error {
 	cfg, err := config.Load()
 	if err != nil {
